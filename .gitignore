@@ -4,6 +4,10 @@
 # Log file
 *.lo
 
-*.settings
+.settings/
 
-*.classpath
+*.classpat
+
+*.project
+
+bin/

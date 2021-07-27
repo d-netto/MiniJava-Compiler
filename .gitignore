@@ -2,4 +2,8 @@
 *.class
 
 # Log file
-*.log
+*.lo
+
+*.settings
+
+*.classpath

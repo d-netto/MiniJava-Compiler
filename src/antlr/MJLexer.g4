@@ -6,9 +6,11 @@ STATIC_KW: 'static';
 VOID_KW: 'void';
 MAIN_KW: 'main';
 STRING_KW: 'String';
+EXTENDS_KW: 'extends';
 
 INT_KW: 'int';
 BOOLEAN_KW: 'boolean';
+INT_ARRAY: 'int[]';
 
 LPARENS: '(';
 RPARENS: ')';
@@ -20,6 +22,7 @@ CURLY_RBRACKET: '}';
 IF: 'if';
 WHILE: 'while';
 PRINTLN: 'System.out.println';
+RETURN: 'return';
 
 AND: '&&';
 NOT: '!';
@@ -38,7 +41,7 @@ NEW: 'new';
 
 ID: [a-zA-Z]+[0-9a-zA-Z_]*;
 
-COLON: ',';
+COMMA: ',';
 SEMI_COLON: ';';
 
 WS: [ \t\r\n]+ -> skip;

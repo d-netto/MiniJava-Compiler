@@ -38,6 +38,7 @@ NEW: 'new';
 
 ID: [a-zA-Z]+[0-9a-zA-Z_]*;
 
+COLON: ',';
 SEMI_COLON: ';';
 
 WS: [ \t\r\n]+ -> skip;

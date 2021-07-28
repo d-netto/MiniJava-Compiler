@@ -245,6 +245,14 @@ public class MJLexerTest {
     }
     
     @Test
+    public void TestSemiColon() throws IOException {
+        String classString = ";";
+        InputStream targetStream = new ByteArrayInputStream(classString.getBytes());
+        Lexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        assertEquals(mjLexer.nextToken().getType(), MJLexer.SEMI_COLON);
+    }
+    
+    @Test
     public void TestNewLine() throws IOException {
         String classString = "new" + "\n" + "line";
         InputStream targetStream = new ByteArrayInputStream(classString.getBytes());

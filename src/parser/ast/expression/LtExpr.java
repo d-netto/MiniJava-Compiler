@@ -1,7 +1,4 @@
-package parser;
-
-import parser.ast.expression.ExprNode;
-
+package parser.ast.expression;
 
 public class LtExpr implements ExprNode {
 

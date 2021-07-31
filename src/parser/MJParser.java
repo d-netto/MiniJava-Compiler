@@ -22,6 +22,7 @@ import parser.ast.expression.FalseExpr;
 import parser.ast.expression.IdentifierExpr;
 import parser.ast.expression.IntExpr;
 import parser.ast.expression.LengthExpr;
+import parser.ast.expression.LtExpr;
 import parser.ast.expression.MethodCallExpr;
 import parser.ast.expression.MultExpr;
 import parser.ast.expression.NewArrayDeclExpr;

@@ -373,12 +373,16 @@ public class MJParser {
             switch (op.getType()) {
             case MJLexer.PLUS:
                 head = new AddExpr(head, rightOperand);
+                break;
             case MJLexer.MINUS:
                 head = new SubExpr(head, rightOperand);
+                break;
             case MJLexer.AND:
                 head = new AndExpr(head, rightOperand);
+                break;
             case MJLexer.LT:
                 head = new LtExpr(head, rightOperand);
+                break;
             default:
                 throw new RuntimeException("Should not get here!");
             }

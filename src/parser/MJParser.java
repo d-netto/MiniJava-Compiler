@@ -1,6 +1,7 @@
 package parser;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -8,8 +9,35 @@ import java.util.Set;
 import org.antlr.v4.runtime.Token;
 
 import antlr.MJLexer;
+import parser.ast.ClassNode;
+import parser.ast.GoalNode;
+import parser.ast.MethodDeclNode;
+import parser.ast.VarDeclNode;
+import parser.ast.expression.AddExpr;
+import parser.ast.expression.AndExpr;
+import parser.ast.expression.ArrayAccessExpr;
+import parser.ast.expression.DotExpr;
+import parser.ast.expression.ExprNode;
+import parser.ast.expression.FalseExpr;
+import parser.ast.expression.IdentifierExpr;
+import parser.ast.expression.IntExpr;
+import parser.ast.expression.LengthExpr;
+import parser.ast.expression.MethodCallExpr;
+import parser.ast.expression.MultExpr;
+import parser.ast.expression.NewArrayDeclExpr;
+import parser.ast.expression.NewObjectDeclExpr;
+import parser.ast.expression.NotExpr;
+import parser.ast.expression.SubExpr;
+import parser.ast.expression.ThisExpr;
+import parser.ast.expression.TrueExpr;
+import parser.ast.statement.ArrayAssignmentStatement;
+import parser.ast.statement.BlockStatement;
+import parser.ast.statement.IfStatement;
+import parser.ast.statement.PrintStatement;
+import parser.ast.statement.StatementNode;
+import parser.ast.statement.VariableAssignmentStatement;
+import parser.ast.statement.WhileStatement;
 
-// TODO: AST nodes --> interfaces and concrete types
 public class MJParser {
     
     public class Pair<K, V> {
@@ -32,86 +60,149 @@ public class MJParser {
         
     }
     
-    private MJLexer scanner;
-    private static Set<Integer> types = Set.of(MJLexer.INT_KW, MJLexer.BOOLEAN_KW, MJLexer.INT_ARRAY, MJLexer.ID);
-    
-    // TODO: implement this
-    public boolean canFormVarDecl() {
-        return false;
+    public class TokenBuffer {
+        
+        private List<Token> buffer;
+        private boolean hasReachedEnd;
+        
+        public TokenBuffer() {
+            this.buffer = new LinkedList<>();
+            this.hasReachedEnd = false;
+        }
     }
     
-    // TODO: implement this
-    public boolean canFormMethodDecl() {
-        return false;
+    private final TokenBuffer tokenBuffer;
+    private final MJLexer scanner;
+    private static final int BUFFER_SIZE = 10;
+    private static final Set<Integer> types = Set.of(MJLexer.INT_KW, MJLexer.BOOLEAN_KW, MJLexer.INT_ARRAY, MJLexer.ID);
+    private static final String[] ruleNames = MJLexer.makeRuleNames();
+    
+    public MJParser(MJLexer scanner) {
+        this.tokenBuffer = new TokenBuffer();
+        this.scanner = scanner;
     }
     
-    // TODO: implement this
-    public boolean canFormStatement() {
-        return false;
+    private Token lookahead(int stepsAhead) {
+        if (!tokenBuffer.hasReachedEnd) {
+            return tokenBuffer.buffer.get(stepsAhead - 1);
+        }
+        return null;
+    }
+    
+    private Token nextToken() {
+        if (!tokenBuffer.hasReachedEnd) {
+            Token firstToken = tokenBuffer.buffer.remove(0);
+            while (!tokenBuffer.hasReachedEnd && tokenBuffer.buffer.size() < BUFFER_SIZE) {
+                Token nextToken = scanner.nextToken();
+                tokenBuffer.buffer.add(nextToken);
+                tokenBuffer.hasReachedEnd = (nextToken.getType() == MJLexer.EOF);
+            }
+            return firstToken;
+        }
+        return null;
+    }
+    
+    private boolean canFormVarDecl() {
+        Token oneAhead = lookahead(1);
+        Token twoAhead = lookahead(2);
+        return types.contains(oneAhead.getType()) && twoAhead.getType() == MJLexer.ID;
+    }
+    
+    private boolean canFormMethodDecl() {
+        return lookahead(1).getType() == MJLexer.PUBLIC_KW;
+    }
+    
+    private boolean canFormStatement() {
+        Token oneAhead = lookahead(1);
+        switch (oneAhead.getType()) {
+            case MJLexer.CURLY_LBRACKET:
+            case MJLexer.IF:
+            case MJLexer.WHILE:
+            case MJLexer.PRINTLN:
+                return true;
+            case MJLexer.ID:
+                int twoAheadType = lookahead(2).getType();
+                return twoAheadType == MJLexer.EQUALS || twoAheadType == MJLexer.LBRACKET;
+            default:
+                return false;
+        }
+    }
+    
+    private Token handleTokenTypeCheck(int expectedTypeInt) {
+        Token token = scanner.nextToken();
+        assert token.getType() == expectedTypeInt: String.format("Expected \"%s\" in line %d", ruleNames[expectedTypeInt - 1], token.getLine());
+        return token;
     }
 
     public GoalNode parseGoal() {
-        assert scanner.nextToken().getType() == MJLexer.CLASS_KW;
-        Token mainClassId = scanner.nextToken();
-        assert mainClassId.getType() == MJLexer.ID;
-        assert scanner.nextToken().getType() == MJLexer.CURLY_LBRACKET;
-        assert scanner.nextToken().getType() == MJLexer.PUBLIC_KW;
-        assert scanner.nextToken().getType() == MJLexer.STATIC_KW;
-        assert scanner.nextToken().getType() == MJLexer.VOID_KW;
-        assert scanner.nextToken().getType() == MJLexer.VOID_KW;
-        assert scanner.nextToken().getType() == MJLexer.MAIN_KW;
-        assert scanner.nextToken().getType() == MJLexer.VOID_KW;
-        assert scanner.nextToken().getType() == MJLexer.LPARENS;
-        assert scanner.nextToken().getType() == MJLexer.VOID_KW;
-        assert scanner.nextToken().getType() == MJLexer.STRING_KW;
-        assert scanner.nextToken().getType() == MJLexer.LBRACKET;
-        assert scanner.nextToken().getType() == MJLexer.RBRACKET;
-        Token argId = scanner.nextToken();
-        assert argId.getType() == MJLexer.ID;
-        assert scanner.nextToken().getType() == MJLexer.CURLY_LBRACKET;
-        StatementNode stmt = parseStatement();
-        assert scanner.nextToken().getType() == MJLexer.CURLY_RBRACKET;
-        assert scanner.nextToken().getType() == MJLexer.CURLY_RBRACKET;
-        return new GoalNode(mainClassId, argId, stmt);
+        handleTokenTypeCheck(MJLexer.CLASS_KW);
+        Token mainClassName = handleTokenTypeCheck(MJLexer.ID);
+        handleTokenTypeCheck(MJLexer.CURLY_LBRACKET);
+        handleTokenTypeCheck(MJLexer.PUBLIC_KW);
+        handleTokenTypeCheck(MJLexer.STATIC_KW);
+        handleTokenTypeCheck(MJLexer.MAIN_KW);
+        handleTokenTypeCheck(MJLexer.LPARENS);
+        handleTokenTypeCheck(MJLexer.STRING_KW);
+        handleTokenTypeCheck(MJLexer.LBRACKET);
+        handleTokenTypeCheck(MJLexer.RBRACKET);
+        String argName = handleTokenTypeCheck(MJLexer.ID).getText();
+        handleTokenTypeCheck(MJLexer.RPARENS);
+        handleTokenTypeCheck(MJLexer.CURLY_LBRACKET);
+        StatementNode statement = parseStatement();
+        handleTokenTypeCheck(MJLexer.CURLY_RBRACKET);
+        handleTokenTypeCheck(MJLexer.CURLY_LBRACKET);
+        return new GoalNode(mainClassName.getText(), argName, statement);
     }
     
     public ClassNode parseClass() {
-        assert scanner.nextToken().getType() == MJLexer.CLASS_KW;
-        Token className = scanner.nextToken();
-        assert className.getType() == MJLexer.ID;
-        Optional<Token> extendsFrom = Optional.empty();
+        handleTokenTypeCheck( MJLexer.CLASS_KW);
+        Token className = handleTokenTypeCheck(MJLexer.ID);
+        Optional<String> extendsFrom = Optional.empty();
         if (scanner.getToken().getType() == MJLexer.EXTENDS_KW) {
-            extendsFrom = Optional.of(scanner.nextToken());
+            extendsFrom = Optional.of(handleTokenTypeCheck(MJLexer.ID).getText());
         }
-        assert scanner.nextToken().getType() == MJLexer.CURLY_LBRACKET;
+        handleTokenTypeCheck(MJLexer.CURLY_LBRACKET);
         List<VarDeclNode> varDecls = new ArrayList<>();
-        List<StatementNode> methodDecls = new ArrayList<>();
+        List<MethodDeclNode> statements = new ArrayList<>();
         while (canFormVarDecl()) {
             varDecls.add(parseVarDecl());
         }
         while (canFormMethodDecl()) {
-            methodDecls.add(parseMethodDecl());
+            statements.add(parseMethodDecl());
         }
-        return ClassNode(className, extendsFrom, varDecls, methodDecls);
+        handleTokenTypeCheck(MJLexer.CURLY_RBRACKET);
+        return new ClassNode(className.getText(), extendsFrom, varDecls, statements);
+    }
+    
+    public VarDeclNode parseVarDecl() {
+        Token type = nextToken();
+        assert types.contains(type.getType()): "Expected \"int\", \"boolean\" or some identifier in line " + type.getLine();
+        Token varName = handleTokenTypeCheck(MJLexer.ID);
+        return new VarDeclNode(type.getLine(), type.getText(), varName.getText());
     }
     
     public MethodDeclNode parseMethodDecl() {
-        assert scanner.nextToken().getType() == MJLexer.PUBLIC_KW;
+        handleTokenTypeCheck(MJLexer.PUBLIC_KW);
         Token methodType = scanner.nextToken();
-        assert types.contains(methodType.getType());
-        Token methodName = scanner.nextToken();
-        assert methodName.getType() == MJLexer.ID;
-        assert scanner.nextToken().getType() == MJLexer.LPARENS;
-        assert types.contains(methodType.getType());
-        List<Pair<Token, Token>> methodArgs = new ArrayList<>();
-        if (types.contains(scanner.getToken().getType())) {
-            methodArgs.add(new Pair<>(scanner.nextToken(), scanner.nextToken()));
+        assert types.contains(methodType.getType()): "Expected \"int\", \"boolean\" or some identifier in line " + methodType.getLine();
+        Token methodName = handleTokenTypeCheck(MJLexer.ID);
+        handleTokenTypeCheck(MJLexer.LPARENS);
+        List<Pair<String, String>> methodArgs = new ArrayList<>();
+        if (types.contains(lookahead(1).getType())) {
+            Token argType = nextToken();
+            assert types.contains(argType.getType()): "Expected \"int\", \"boolean\" or some identifier in line " + argType.getLine();
+            Token argName = handleTokenTypeCheck(MJLexer.ID);
+            methodArgs.add(new Pair<>(argType.getText(), argName.getText()));
+            while (lookahead(1).getType() == MJLexer.COMMA) {
+                handleTokenTypeCheck(MJLexer.COMMA);
+                argType = nextToken();
+                assert types.contains(argType.getType()): "Expected \"int\", \"boolean\" or some identifier in line " + argType.getLine();
+                argName = handleTokenTypeCheck(MJLexer.ID);
+                methodArgs.add(new Pair<>(argType.getText(), argName.getText()));
+            }
         }
-        while (scanner.getToken().getType() == MJLexer.COMMA) {
-            methodArgs.add(new Pair<>(scanner.nextToken(), scanner.nextToken()));
-        }
-        assert scanner.nextToken().getType() == MJLexer.RPARENS;
-        assert scanner.nextToken().getType() == MJLexer.CURLY_LBRACKET;
+        handleTokenTypeCheck(MJLexer.RPARENS);
+        handleTokenTypeCheck(MJLexer.CURLY_LBRACKET);
         List<VarDeclNode> varDecls = new ArrayList<>();
         List<StatementNode> statements = new ArrayList<>();
         while (canFormVarDecl()) {
@@ -120,21 +211,170 @@ public class MJParser {
         while (canFormStatement()) {
             statements.add(parseStatement());
         }
-        assert scanner.nextToken().getType() == MJLexer.RETURN;
-        Expression returnExpr = parseExpr();
-        assert scanner.nextToken().getType() == MJLexer.CURLY_LBRACKET;
-        assert scanner.nextToken().getType() == MJLexer.SEMI_COLON;
-        return ClassNode(methodType, methodName, methodArgs, varDecls, statements);
+        handleTokenTypeCheck(MJLexer.RETURN);
+        ExprNode returnExpr = parseExpr();
+        handleTokenTypeCheck(MJLexer.CURLY_LBRACKET);
+        handleTokenTypeCheck(MJLexer.SEMI_COLON);
+        return new MethodDeclNode(methodType.getText(), methodName.getText(), methodArgs, varDecls, statements, returnExpr);
     }
-    
-    // TODO: implement this
+
     public StatementNode parseStatement() {
-        return null;
+        Token oneAhead = nextToken();
+        switch (oneAhead.getType()) {
+            case MJLexer.CURLY_LBRACKET:
+                List<StatementNode> statements = new ArrayList<>();
+                while (canFormStatement()) {
+                    statements.add(parseStatement());
+                }
+                handleTokenTypeCheck(MJLexer.CURLY_RBRACKET);
+                return new BlockStatement(statements);
+            case MJLexer.IF:
+                handleTokenTypeCheck(MJLexer.LPARENS);
+                ExprNode ifCondition = parseExpr();
+                handleTokenTypeCheck(MJLexer.RPARENS);
+                StatementNode ifBlock = parseStatement();
+                handleTokenTypeCheck(MJLexer.ELSE);
+                StatementNode elseBlock = parseStatement();
+                return new IfStatement(ifCondition, ifBlock, elseBlock);
+            case MJLexer.WHILE:
+                handleTokenTypeCheck(MJLexer.LPARENS);
+                ExprNode whileCondition = parseExpr();
+                handleTokenTypeCheck(MJLexer.RPARENS);
+                StatementNode whileBlock = parseStatement();
+                return new WhileStatement(whileCondition, whileBlock);
+            case MJLexer.PRINTLN:
+                handleTokenTypeCheck(MJLexer.LPARENS);
+                ExprNode printExpr = parseExpr();
+                handleTokenTypeCheck(MJLexer.RPARENS);
+                handleTokenTypeCheck(MJLexer.SEMI_COLON);
+                return new PrintStatement(printExpr);
+            case MJLexer.ID:
+                Token twoAhead = nextToken();
+                if (twoAhead.getType() == MJLexer.EQUALS) {
+                    ExprNode rhs = parseExpr();
+                    return new VariableAssignmentStatement(twoAhead.getLine(), twoAhead.getText(), rhs);
+                }
+                else if (twoAhead.getType() == MJLexer.LBRACKET) {
+                    ExprNode arrayExpr = parseExpr();
+                    handleTokenTypeCheck(MJLexer.RBRACKET);
+                    ExprNode rhs = parseExpr();
+                    return new ArrayAssignmentStatement(twoAhead.getLine(), twoAhead.getText(), arrayExpr, rhs);
+                }
+            default:
+                throw new RuntimeException("Error while trying to parse statement in line " + oneAhead.getLine());
+                
+        }
     }
     
-    //TODO: implement this
+    public ExprNode parseFactor() {
+        Token oneAhead = nextToken();
+        ExprNode head = null;
+        switch (oneAhead.getType()) {
+            case MJLexer.INT_LITERAL:
+                head = new IntExpr(oneAhead.getText());
+                break;
+            case MJLexer.TRUE:
+                head = new TrueExpr();
+                break;
+            case MJLexer.FALSE:
+                head = new FalseExpr();
+                break;
+            case MJLexer.ID:
+                head = new IdentifierExpr(oneAhead.getText());
+                break;
+            case MJLexer.THIS:
+                head = new ThisExpr();
+                break;
+            case MJLexer.NEW:
+                Token twoAhead = nextToken();
+                if (twoAhead.getType() == MJLexer.INT_KW) {
+                    handleTokenTypeCheck(MJLexer.LBRACKET);
+                    ExprNode size = parseExpr();
+                    handleTokenTypeCheck(MJLexer.RBRACKET);
+                    head = new NewArrayDeclExpr(size);
+                }
+                else if (twoAhead.getType() == MJLexer.ID) {
+                    handleTokenTypeCheck(MJLexer.LPARENS);
+                    handleTokenTypeCheck(MJLexer.RPARENS);
+                    head = new NewObjectDeclExpr(twoAhead.getText());
+                }
+                break;
+            case MJLexer.NOT:
+                ExprNode argument = parseExpr();
+                head = new NotExpr(argument);
+                break;
+            case MJLexer.LPARENS:
+                handleTokenTypeCheck(MJLexer.LPARENS);
+                head = parseExpr();
+                handleTokenTypeCheck(MJLexer.RPARENS);
+                break;
+            default:
+                throw new RuntimeException("Should not get here!");
+        }
+        switch (lookahead(1).getType()) {
+            case MJLexer.LBRACKET:
+                handleTokenTypeCheck(MJLexer.LBRACKET);
+                ExprNode index = parseExpr();
+                handleTokenTypeCheck(MJLexer.RBRACKET);
+                return new ArrayAccessExpr(head, index);
+            case MJLexer.DOT:
+                handleTokenTypeCheck(MJLexer.DOT);
+                Token nextToken = nextToken();
+                if (nextToken.getType() == MJLexer.LENGTH_KW) {
+                    head = new LengthExpr(head);
+                }
+                else if (nextToken.getType() == MJLexer.ID) {
+                    ExprNode fieldId = new IdentifierExpr(nextToken.getText());
+                    head = new DotExpr(head, fieldId);
+                    while (lookahead(1).getType() == MJLexer.DOT) {
+                        fieldId = new IdentifierExpr(handleTokenTypeCheck(MJLexer.ID).getText());
+                        head = new DotExpr(head, fieldId);
+                    }
+                    handleTokenTypeCheck(MJLexer.LPARENS);
+                    List<ExprNode> args = new ArrayList<>();
+                    args.add(parseExpr());
+                    while (lookahead(1).getType() == MJLexer.COMMA) {
+                        handleTokenTypeCheck(MJLexer.COMMA);
+                        args.add(parseExpr());
+                    }
+                    handleTokenTypeCheck(MJLexer.RPARENS);
+                    return new MethodCallExpr(head, args);
+                }
+             default:
+                 return head;
+        }
+        
+    }
+    
+    public ExprNode parseTerm() {
+        ExprNode head = parseFactor();
+        while (lookahead(1).getType() == MJLexer.MULT) {
+            handleTokenTypeCheck(MJLexer.MULT);
+            ExprNode rightOperand = parseFactor();
+            head = new MultExpr(head, rightOperand);
+        }
+        return head;
+    }
+    
     public ExprNode parseExpr() {
-        return null;
+        ExprNode head = parseTerm();
+        while (Set.of(MJLexer.PLUS, MJLexer.MINUS, MJLexer.AND, MJLexer.LT).contains(lookahead(1).getType())) {
+            Token op = nextToken();
+            ExprNode rightOperand = parseTerm();
+            switch (op.getType()) {
+                case MJLexer.PLUS:
+                    head = new AddExpr(head, rightOperand);
+                case MJLexer.MINUS:
+                    head = new SubExpr(head, rightOperand);
+                case MJLexer.AND:
+                    head = new AndExpr(head, rightOperand);
+                case MJLexer.LT:
+                    head = new LtExpr(head, rightOperand);
+                default:
+                    throw new RuntimeException("Should not get here!");
+            }
+        }
+        return head;
     }
     
 }

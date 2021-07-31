@@ -149,6 +149,22 @@ public class MJLexerTest {
     }
     
     @Test
+    public void TestReturn() throws IOException {
+        String classString = "return";
+        InputStream targetStream = new ByteArrayInputStream(classString.getBytes());
+        Lexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        assertEquals(mjLexer.nextToken().getType(), MJLexer.RETURN);
+    }
+    
+    @Test
+    public void TestEquals() throws IOException {
+        String classString = "=";
+        InputStream targetStream = new ByteArrayInputStream(classString.getBytes());
+        Lexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        assertEquals(mjLexer.nextToken().getType(), MJLexer.EQUALS);
+    }
+    
+    @Test
     public void TestAnd() throws IOException {
         String classString = "&&";
         InputStream targetStream = new ByteArrayInputStream(classString.getBytes());
@@ -245,11 +261,19 @@ public class MJLexerTest {
     }
     
     @Test
+    public void TestIntLiteral() throws IOException {
+        String classString = "1234";
+        InputStream targetStream = new ByteArrayInputStream(classString.getBytes());
+        Lexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        assertEquals(mjLexer.nextToken().getType(), MJLexer.INT_LITERAL);
+    }
+    
+    @Test
     public void TestColon() throws IOException {
         String classString = ",";
         InputStream targetStream = new ByteArrayInputStream(classString.getBytes());
         Lexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
-        assertEquals(mjLexer.nextToken().getType(), MJLexer.COLON);
+        assertEquals(mjLexer.nextToken().getType(), MJLexer.COMMA);
     }
     
     @Test

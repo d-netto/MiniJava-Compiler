@@ -1,0 +1,12 @@
+package parser.ast.expression;
+
+
+public class IntExpr implements ExprNode {
+    
+    private String integerVal;
+    
+    public IntExpr(String integerVal) {
+        this.integerVal = integerVal;
+    }
+
+}

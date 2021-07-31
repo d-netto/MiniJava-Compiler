@@ -1,0 +1,22 @@
+package parser.ast;
+
+import java.util.List;
+import java.util.Optional;
+
+import parser.ast.statement.StatementNode;
+
+public class ClassNode {
+    
+    private String className;
+    private Optional<String> extendsFrom;
+    private List<VarDeclNode> varDecls;
+    private List<MethodDeclNode> methodDecls;
+    
+    public ClassNode(String className, Optional<String> extendsFrom, List<VarDeclNode> varDecls, List<MethodDeclNode> methodDecls) {
+        this.className = className;
+        this.extendsFrom = extendsFrom;
+        this.varDecls = varDecls;
+        this.methodDecls = methodDecls;
+    }
+
+}

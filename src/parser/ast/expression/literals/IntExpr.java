@@ -1,4 +1,4 @@
-package parser.ast.expression;
+package parser.ast.expression.literals;
 
 import parser.ast.interfaces.ExprNode;
 

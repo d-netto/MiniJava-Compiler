@@ -67,6 +67,22 @@ public class MJParserTest {
         mjParser.parseExpr();
     }
 
+    @Test public void TestNewArrayExpr() throws IOException {
+        String expr = "new int[a+b]";
+        InputStream targetStream = new ByteArrayInputStream(expr.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseExpr();
+    }
+
+    @Test public void TestNewObjectExpr() throws IOException {
+        String expr = "new myObject()";
+        InputStream targetStream = new ByteArrayInputStream(expr.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseExpr();
+    }
+
     @Test public void TestArrayAccess() throws IOException {
         String expr = "a[b + c]";
         InputStream targetStream = new ByteArrayInputStream(expr.getBytes());

@@ -302,10 +302,8 @@ public class MJParser {
             break;
         case MJLexer.NEW:
             Token twoAhead = nextToken();
-            if (twoAhead.getType() == MJLexer.INT_KW) {
-                handleTokenTypeCheck(MJLexer.LBRACKET);
+            if (twoAhead.getType() == MJLexer.INT_ARRAY) {
                 ExprNode size = parseExpr();
-                handleTokenTypeCheck(MJLexer.RBRACKET);
                 head = new NewArrayDeclExpr(size);
             } else if (twoAhead.getType() == MJLexer.ID) {
                 handleTokenTypeCheck(MJLexer.LPARENS);

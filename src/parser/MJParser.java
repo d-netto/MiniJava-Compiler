@@ -76,7 +76,11 @@ public class MJParser {
     private final MJLexer scanner;
     private static final int BUFFER_SIZE = 10;
     private static final Set<Integer> types = Set.of(MJLexer.INT_KW, MJLexer.BOOLEAN_KW, MJLexer.INT_ARRAY, MJLexer.ID);
-    private static final String[] ruleNames = MJLexer.makeRuleNames();
+    private static final String[] ruleNames = { "CLASS_KW", "PUBLIC_KW", "STATIC_KW", "VOID_KW", "MAIN_KW", "STRING_KW",
+            "EXTENDS_KW", "LENGTH_KW", "INT_KW", "BOOLEAN_KW", "INT_ARRAY", "LPARENS", "RPARENS", "LBRACKET",
+            "RBRACKET", "CURLY_LBRACKET", "CURLY_RBRACKET", "IF", "ELSE", "WHILE", "PRINTLN", "RETURN", "EQUALS", "AND",
+            "NOT", "LT", "PLUS", "MINUS", "MULT", "DOT", "TRUE", "FALSE", "THIS", "NEW", "ID", "INT_LITERAL", "COMMA",
+            "SEMI_COLON", "WS", "COMMENT" };
 
     public MJParser(MJLexer scanner) {
         LinkedList<Token> buffer = new LinkedList<>(List.of(scanner.nextToken()));
@@ -381,8 +385,6 @@ public class MJParser {
             case MJLexer.LT:
                 head = new LtExpr(head, rightOperand);
                 break;
-            default:
-                throw new RuntimeException("Should not get here!");
             }
         }
         return head;

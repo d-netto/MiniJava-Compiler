@@ -31,7 +31,7 @@ public class MJLexer extends Lexer {
 		"DEFAULT_MODE"
 	};
 
-	public static String[] makeRuleNames() {
+	private static String[] makeRuleNames() {
 		return new String[] {
 			"CLASS_KW", "PUBLIC_KW", "STATIC_KW", "VOID_KW", "MAIN_KW", "STRING_KW", 
 			"EXTENDS_KW", "LENGTH_KW", "INT_KW", "BOOLEAN_KW", "INT_ARRAY", "LPARENS", 

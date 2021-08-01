@@ -309,6 +309,8 @@ public class MJParser {
                 handleTokenTypeCheck(MJLexer.LPARENS);
                 handleTokenTypeCheck(MJLexer.RPARENS);
                 head = new NewObjectDeclExpr(twoAhead.getText());
+            } else {
+                throw new RuntimeException("Failed while trying to parse \"new ...\" in line " + oneAhead.getLine());
             }
             break;
         case MJLexer.NOT:
@@ -351,6 +353,9 @@ public class MJParser {
                 }
                 handleTokenTypeCheck(MJLexer.RPARENS);
                 head = new MethodCallExpr(head, args);
+            } else {
+                throw new RuntimeException(
+                        "Failed while trying to parse expression of form \"A.B\" in line " + oneAhead.getLine());
             }
             break;
         }

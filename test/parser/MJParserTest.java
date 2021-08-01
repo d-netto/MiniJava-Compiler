@@ -59,6 +59,14 @@ public class MJParserTest {
         mjParser.parseExpr();
     }
 
+    @Test public void TestParenthesisExpr() throws IOException {
+        String expr = "(a + b) * c";
+        InputStream targetStream = new ByteArrayInputStream(expr.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseExpr();
+    }
+
     @Test public void TestArrayAccess() throws IOException {
         String expr = "a[b + c]";
         InputStream targetStream = new ByteArrayInputStream(expr.getBytes());

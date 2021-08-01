@@ -318,7 +318,6 @@ public class MJParser {
             head = new NotExpr(argument);
             break;
         case MJLexer.LPARENS:
-            handleTokenTypeCheck(MJLexer.LPARENS);
             head = parseExpr();
             handleTokenTypeCheck(MJLexer.RPARENS);
             break;

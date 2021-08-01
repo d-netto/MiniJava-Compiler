@@ -326,7 +326,7 @@ public class MJParser {
             handleTokenTypeCheck(MJLexer.LBRACKET);
             ExprNode index = parseExpr();
             handleTokenTypeCheck(MJLexer.RBRACKET);
-            return new ArrayAccessExpr(head, index);
+            head = new ArrayAccessExpr(head, index);
         case MJLexer.DOT:
             handleTokenTypeCheck(MJLexer.DOT);
             Token nextToken = nextToken();
@@ -347,12 +347,10 @@ public class MJParser {
                     args.add(parseExpr());
                 }
                 handleTokenTypeCheck(MJLexer.RPARENS);
-                return new MethodCallExpr(head, args);
+                head = new MethodCallExpr(head, args);
             }
-        default:
-            return head;
         }
-
+        return head;
     }
 
     public ExprNode parseTerm() {

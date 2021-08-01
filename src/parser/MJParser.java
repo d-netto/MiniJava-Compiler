@@ -32,10 +32,10 @@ import parser.ast.expression.singletons.ThisExpr;
 import parser.ast.expression.singletons.TrueExpr;
 import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
-import parser.ast.statement.SetArrayIndexStatement;
 import parser.ast.statement.BlockStatement;
 import parser.ast.statement.IfStatement;
 import parser.ast.statement.PrintStatement;
+import parser.ast.statement.SetArrayIndexStatement;
 import parser.ast.statement.SetVariableStatement;
 import parser.ast.statement.WhileStatement;
 
@@ -266,13 +266,13 @@ public class MJParser {
         case MJLexer.ID:
             Token twoAhead = nextToken();
             if (twoAhead.getType() == MJLexer.EQUALS) {
-                ExprNode rhs = parseExpr();
-                return new SetVariableStatement(twoAhead.getLine(), twoAhead.getText(), rhs);
+                ExprNode rightHandSide = parseExpr();
+                return new SetVariableStatement(twoAhead.getLine(), twoAhead.getText(), rightHandSide);
             } else if (twoAhead.getType() == MJLexer.LBRACKET) {
                 ExprNode arrayExpr = parseExpr();
                 handleTokenTypeCheck(MJLexer.RBRACKET);
-                ExprNode rhs = parseExpr();
-                return new SetArrayIndexStatement(twoAhead.getLine(), twoAhead.getText(), arrayExpr, rhs);
+                ExprNode index = parseExpr();
+                return new SetArrayIndexStatement(twoAhead.getLine(), twoAhead.getText(), arrayExpr, index);
             }
         default:
             throw new RuntimeException(

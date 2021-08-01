@@ -156,7 +156,7 @@ public class MJParser {
         while (lookahead(1).getType() == MJLexer.CLASS_KW) {
             classes.add(parseClass());
         }
-        assert nextToken().getType() == MJLexer.EOF : "Incorrect end of file";
+        assert nextToken().getType() == MJLexer.EOF : "Expected end of file";
         return new GoalNode(mainClassName.getText(), argName, statement, classes);
     }
 
@@ -319,7 +319,7 @@ public class MJParser {
             handleTokenTypeCheck(MJLexer.RPARENS);
             break;
         default:
-            throw new RuntimeException("Should not get here!");
+            throw new RuntimeException("Failed while trying to parse \"factor\" in line " + oneAhead.getLine());
         }
         switch (lookahead(1).getType()) {
         case MJLexer.LBRACKET:

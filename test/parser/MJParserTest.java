@@ -1,18 +1,17 @@
 package parser;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.Lexer;
 import org.junit.Test;
 
 import antlr.MJLexer;
 
 public class MJParserTest {
+
+    // TODO: write unit tests --> try to parse "smaller nodes", not whole GoalNode
 
     @Test public void TestSimpleProgram() throws IOException {
         String simpleProgram = "class Main {\n" + "public static void main(String[] args) {\n"

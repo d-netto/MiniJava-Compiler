@@ -1,6 +1,7 @@
 package parser.ast.statement;
 
-import parser.ast.expression.ExprNode;
+import parser.ast.interfaces.ExprNode;
+import parser.ast.interfaces.StatementNode;
 
 public class PrintStatement implements StatementNode {
     

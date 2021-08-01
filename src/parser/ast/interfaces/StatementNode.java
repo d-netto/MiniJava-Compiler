@@ -1,4 +1,4 @@
-package parser.ast.statement;
+package parser.ast.interfaces;
 
 
 public interface StatementNode {

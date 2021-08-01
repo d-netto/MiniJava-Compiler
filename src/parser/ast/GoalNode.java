@@ -2,7 +2,7 @@ package parser.ast;
 
 import java.util.List;
 
-import parser.ast.statement.StatementNode;
+import parser.ast.interfaces.StatementNode;
 
 public class GoalNode {
     

@@ -2,6 +2,8 @@ package parser.ast.expression;
 
 import java.util.List;
 
+import parser.ast.interfaces.ExprNode;
+
 public class MethodCallExpr implements ExprNode {
     
     private ExprNode methodNameExpr;

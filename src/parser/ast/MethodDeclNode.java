@@ -3,8 +3,8 @@ package parser.ast;
 import java.util.List;
 
 import parser.MJParser.Pair;
-import parser.ast.expression.ExprNode;
-import parser.ast.statement.StatementNode;
+import parser.ast.interfaces.ExprNode;
+import parser.ast.interfaces.StatementNode;
 
 public class MethodDeclNode {
     

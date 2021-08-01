@@ -13,30 +13,30 @@ import parser.ast.ClassNode;
 import parser.ast.GoalNode;
 import parser.ast.MethodDeclNode;
 import parser.ast.VarDeclNode;
-import parser.ast.expression.AddExpr;
-import parser.ast.expression.AndExpr;
 import parser.ast.expression.ArrayAccessExpr;
-import parser.ast.expression.DotExpr;
-import parser.ast.expression.ExprNode;
-import parser.ast.expression.FalseExpr;
-import parser.ast.expression.IdentifierExpr;
 import parser.ast.expression.IntExpr;
-import parser.ast.expression.LengthExpr;
-import parser.ast.expression.LtExpr;
 import parser.ast.expression.MethodCallExpr;
-import parser.ast.expression.MultExpr;
 import parser.ast.expression.NewArrayDeclExpr;
 import parser.ast.expression.NewObjectDeclExpr;
-import parser.ast.expression.NotExpr;
-import parser.ast.expression.SubExpr;
-import parser.ast.expression.ThisExpr;
-import parser.ast.expression.TrueExpr;
-import parser.ast.statement.ArrayAssignmentStatement;
+import parser.ast.expression.binary_expr.AddExpr;
+import parser.ast.expression.binary_expr.AndExpr;
+import parser.ast.expression.binary_expr.DotExpr;
+import parser.ast.expression.binary_expr.LtExpr;
+import parser.ast.expression.binary_expr.MultExpr;
+import parser.ast.expression.binary_expr.SubExpr;
+import parser.ast.expression.literals.IdentifierExpr;
+import parser.ast.expression.literals.LengthExpr;
+import parser.ast.expression.singletons.FalseExpr;
+import parser.ast.expression.singletons.NotExpr;
+import parser.ast.expression.singletons.ThisExpr;
+import parser.ast.expression.singletons.TrueExpr;
+import parser.ast.interfaces.ExprNode;
+import parser.ast.interfaces.StatementNode;
+import parser.ast.statement.SetArrayIndexStatement;
 import parser.ast.statement.BlockStatement;
 import parser.ast.statement.IfStatement;
 import parser.ast.statement.PrintStatement;
-import parser.ast.statement.StatementNode;
-import parser.ast.statement.VariableAssignmentStatement;
+import parser.ast.statement.SetVariableStatement;
 import parser.ast.statement.WhileStatement;
 
 public class MJParser {
@@ -267,12 +267,12 @@ public class MJParser {
             Token twoAhead = nextToken();
             if (twoAhead.getType() == MJLexer.EQUALS) {
                 ExprNode rhs = parseExpr();
-                return new VariableAssignmentStatement(twoAhead.getLine(), twoAhead.getText(), rhs);
+                return new SetVariableStatement(twoAhead.getLine(), twoAhead.getText(), rhs);
             } else if (twoAhead.getType() == MJLexer.LBRACKET) {
                 ExprNode arrayExpr = parseExpr();
                 handleTokenTypeCheck(MJLexer.RBRACKET);
                 ExprNode rhs = parseExpr();
-                return new ArrayAssignmentStatement(twoAhead.getLine(), twoAhead.getText(), arrayExpr, rhs);
+                return new SetArrayIndexStatement(twoAhead.getLine(), twoAhead.getText(), arrayExpr, rhs);
             }
         default:
             throw new RuntimeException(

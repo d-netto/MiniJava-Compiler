@@ -1,5 +1,6 @@
-package parser.ast.expression;
+package parser.ast.expression.singletons;
 
+import parser.ast.interfaces.ExprNode;
 
 public class NotExpr implements ExprNode {
     

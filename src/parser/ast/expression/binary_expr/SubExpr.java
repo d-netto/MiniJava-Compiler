@@ -8,4 +8,9 @@ public class SubExpr extends BinaryExpr {
         super(leftHandSide, rightHandSide);
     }
 
+    public String prettyPrint(String identation) {
+        return identation + "SubExpr:" + "\n" + leftHandSide.prettyPrint(identation + "\t") + "\n"
+                + rightHandSide.prettyPrint(identation + "\t");
+    }
+
 }

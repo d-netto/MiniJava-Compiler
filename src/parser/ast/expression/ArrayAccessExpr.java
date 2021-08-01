@@ -12,4 +12,9 @@ public class ArrayAccessExpr implements ExprNode {
         this.index = index;
     }
 
+    public String prettyPrint(String identation) {
+        return identation + "ArrayAccessExpr:" + "\n" + array.prettyPrint(identation + "\t") + "\n"
+                + index.prettyPrint(identation + "\t");
+    }
+
 }

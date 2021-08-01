@@ -8,4 +8,9 @@ public class MultExpr extends BinaryExpr {
         super(leftHandSide, rightHandSide);
     }
 
+    public String prettyPrint(String identation) {
+        return identation + "MultExpr:" + "\n" + leftHandSide.prettyPrint(identation + "\t") + "\n"
+                + rightHandSide.prettyPrint(identation + "\t");
+    }
+
 }

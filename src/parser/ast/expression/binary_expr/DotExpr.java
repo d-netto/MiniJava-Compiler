@@ -8,4 +8,9 @@ public class DotExpr extends BinaryExpr {
         super(leftHandSide, rightHandSide);
     }
 
+    public String prettyPrint(String identation) {
+        return identation + "DotExpr:" + "\n" + leftHandSide.prettyPrint(identation + "\t") + "\n"
+                + rightHandSide.prettyPrint(identation + "\t");
+    }
+
 }

@@ -267,12 +267,15 @@ public class MJParser {
             Token twoAhead = nextToken();
             if (twoAhead.getType() == MJLexer.EQUALS) {
                 ExprNode rightHandSide = parseExpr();
-                return new SetVariableStatement(twoAhead.getLine(), twoAhead.getText(), rightHandSide);
+                handleTokenTypeCheck(MJLexer.SEMI_COLON);
+                return new SetVariableStatement(oneAhead.getLine(), oneAhead.getText(), rightHandSide);
             } else if (twoAhead.getType() == MJLexer.LBRACKET) {
                 ExprNode arrayExpr = parseExpr();
                 handleTokenTypeCheck(MJLexer.RBRACKET);
+                handleTokenTypeCheck(MJLexer.EQUALS);
                 ExprNode index = parseExpr();
-                return new SetArrayIndexStatement(twoAhead.getLine(), twoAhead.getText(), arrayExpr, index);
+                handleTokenTypeCheck(MJLexer.SEMI_COLON);
+                return new SetArrayIndexStatement(oneAhead.getLine(), oneAhead.getText(), arrayExpr, index);
             }
         default:
             throw new RuntimeException(
@@ -316,7 +319,7 @@ public class MJParser {
             }
             break;
         case MJLexer.NOT:
-            ExprNode argument = parseExpr();
+            ExprNode argument = parseFactor();
             head = new NotExpr(argument);
             break;
         case MJLexer.LPARENS:
@@ -324,7 +327,8 @@ public class MJParser {
             handleTokenTypeCheck(MJLexer.RPARENS);
             break;
         default:
-            throw new RuntimeException("Failed while trying to parse \"factor\" in line " + oneAhead.getLine());
+            throw new RuntimeException("Failed while trying to parse \"factor\" in line " + oneAhead.getLine()
+                    + ". Got " + oneAhead.getText() + " instead");
         }
         switch (lookahead(1).getType()) {
         case MJLexer.LBRACKET:
@@ -348,10 +352,12 @@ public class MJParser {
                 }
                 handleTokenTypeCheck(MJLexer.LPARENS);
                 List<ExprNode> args = new ArrayList<>();
-                args.add(parseExpr());
-                while (lookahead(1).getType() == MJLexer.COMMA) {
-                    handleTokenTypeCheck(MJLexer.COMMA);
+                if (!(lookahead(1).getType() == MJLexer.RPARENS)) {
                     args.add(parseExpr());
+                    while (lookahead(1).getType() == MJLexer.COMMA) {
+                        handleTokenTypeCheck(MJLexer.COMMA);
+                        args.add(parseExpr());
+                    }
                 }
                 handleTokenTypeCheck(MJLexer.RPARENS);
                 head = new MethodCallExpr(head, args);

@@ -4,8 +4,8 @@ import parser.ast.interfaces.ExprNode;
 
 public abstract class BinaryExpr implements ExprNode {
 
-    private ExprNode leftHandSide;
-    private ExprNode rightHandSide;
+    protected ExprNode leftHandSide;
+    protected ExprNode rightHandSide;
 
     public BinaryExpr(ExprNode leftHandSide, ExprNode rightHandSide) {
         this.leftHandSide = leftHandSide;

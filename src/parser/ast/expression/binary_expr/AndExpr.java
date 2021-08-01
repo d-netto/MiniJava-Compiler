@@ -8,4 +8,9 @@ public class AndExpr extends BinaryExpr {
         super(leftHandSide, rightHandSide);
     }
 
+    public String prettyPrint(String identation) {
+        return identation + "AndExpr:" + "\n" + leftHandSide.prettyPrint(identation + "\t") + "\n"
+                + rightHandSide.prettyPrint(identation + "\t");
+    }
+
 }

@@ -6,8 +6,8 @@ import parser.ast.interfaces.ExprNode;
 
 public class MethodCallExpr implements ExprNode {
 
-    private ExprNode methodNameExpr;
-    private List<ExprNode> args;
+    public final ExprNode methodNameExpr;
+    public final List<ExprNode> args;
 
     public MethodCallExpr(ExprNode methodNameExpr, List<ExprNode> args) {
         this.methodNameExpr = methodNameExpr;

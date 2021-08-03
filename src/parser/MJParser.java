@@ -43,8 +43,8 @@ public class MJParser {
 
     public class Pair<K, V> {
 
-        private K first;
-        private V second;
+        private final K first;
+        private final V second;
 
         public Pair(K first, V second) {
             this.first = first;
@@ -63,7 +63,7 @@ public class MJParser {
 
     public class TokenBuffer {
 
-        private LinkedList<Token> buffer;
+        private final LinkedList<Token> buffer;
         private boolean hasReachedEnd;
 
         public TokenBuffer(LinkedList<Token> buffer) {
@@ -74,9 +74,9 @@ public class MJParser {
 
     private final TokenBuffer tokenBuffer;
     private final MJLexer scanner;
-    private static final int BUFFER_SIZE = 10;
-    private static final Set<Integer> types = Set.of(MJLexer.INT_KW, MJLexer.BOOLEAN_KW, MJLexer.INT_ARRAY, MJLexer.ID);
-    private static final String[] ruleNames = { "CLASS_KW", "PUBLIC_KW", "STATIC_KW", "VOID_KW", "MAIN_KW", "STRING_KW",
+    private final static int BUFFER_SIZE = 10;
+    private final static Set<Integer> types = Set.of(MJLexer.INT_KW, MJLexer.BOOLEAN_KW, MJLexer.INT_ARRAY, MJLexer.ID);
+    private final static String[] ruleNames = { "CLASS_KW", "PUBLIC_KW", "STATIC_KW", "VOID_KW", "MAIN_KW", "STRING_KW",
             "EXTENDS_KW", "LENGTH_KW", "INT_KW", "BOOLEAN_KW", "INT_ARRAY", "LPARENS", "RPARENS", "LBRACKET",
             "RBRACKET", "CURLY_LBRACKET", "CURLY_RBRACKET", "IF", "ELSE", "WHILE", "PRINTLN", "RETURN", "EQUALS", "AND",
             "NOT", "LT", "PLUS", "MINUS", "MULT", "DOT", "TRUE", "FALSE", "THIS", "NEW", "ID", "INT_LITERAL", "COMMA",
@@ -88,11 +88,11 @@ public class MJParser {
         this.scanner = scanner;
     }
 
-    private Token lookahead(int stepsAhead) {
+    private final Token lookahead(int stepsAhead) {
         return tokenBuffer.buffer.get(stepsAhead - 1);
     }
 
-    private Token nextToken() {
+    private final Token nextToken() {
         if (!tokenBuffer.hasReachedEnd) {
             Token firstToken = tokenBuffer.buffer.remove(0);
             while (!tokenBuffer.hasReachedEnd && tokenBuffer.buffer.size() < BUFFER_SIZE) {
@@ -105,17 +105,17 @@ public class MJParser {
         return tokenBuffer.buffer.remove(0);
     }
 
-    private boolean canFormVarDecl() {
+    private final boolean canFormVarDecl() {
         Token oneAhead = lookahead(1);
         Token twoAhead = lookahead(2);
         return types.contains(oneAhead.getType()) && twoAhead.getType() == MJLexer.ID;
     }
 
-    private boolean canFormMethodDecl() {
+    private final boolean canFormMethodDecl() {
         return lookahead(1).getType() == MJLexer.PUBLIC_KW;
     }
 
-    private boolean canFormStatement() {
+    private final boolean canFormStatement() {
         Token oneAhead = lookahead(1);
         switch (oneAhead.getType()) {
         case MJLexer.CURLY_LBRACKET:
@@ -131,10 +131,11 @@ public class MJParser {
         }
     }
 
-    private Token handleTokenTypeCheck(int expectedTypeInt) {
+    private final Token handleTokenTypeCheck(int expectedTypeInt) {
         Token token = nextToken();
-        assert token.getType() == expectedTypeInt : String.format("Expected \"%s\" in line %d",
-                ruleNames[expectedTypeInt - 1], token.getLine());
+        assert token.getType() == expectedTypeInt : String.format(
+                "Expected \"%s\" in line %d but got \"%s\" with text \"%s\"", ruleNames[expectedTypeInt - 1],
+                token.getLine(), ruleNames[token.getType() - 1], token.getText());
         return token;
     }
 
@@ -160,7 +161,8 @@ public class MJParser {
         while (lookahead(1).getType() == MJLexer.CLASS_KW) {
             classes.add(parseClass());
         }
-        assert nextToken().getType() == MJLexer.EOF : "Expected end of file";
+        Token shouldBeEOF = nextToken();
+        assert shouldBeEOF.getType() == MJLexer.EOF : "Expected end of file but got \"" + shouldBeEOF.getText() + "\"";
         return new GoalNode(mainClassName.getText(), argName, statement, classes);
     }
 
@@ -242,6 +244,7 @@ public class MJParser {
             while (canFormStatement()) {
                 statements.add(parseStatement());
             }
+            handleTokenTypeCheck(MJLexer.CURLY_RBRACKET);
             return new BlockStatement(statements);
         case MJLexer.IF:
             handleTokenTypeCheck(MJLexer.LPARENS);

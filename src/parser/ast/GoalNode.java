@@ -3,13 +3,14 @@ package parser.ast;
 import java.util.List;
 
 import parser.ast.interfaces.StatementNode;
+import semantics.BuilderVisitor;
 
 public class GoalNode {
 
-    private String mainClassName;
-    private String argName;
-    private StatementNode statement;
-    private List<ClassNode> classes;
+    public final String mainClassName;
+    public final String argName;
+    public final StatementNode statement;
+    public final List<ClassNode> classes;
 
     public GoalNode(String mainClassName, String argName, StatementNode statement, List<ClassNode> classes) {
         this.mainClassName = mainClassName;
@@ -26,6 +27,10 @@ public class GoalNode {
             str += "\n" + _class.prettyPrint(identation + "\t");
         }
         return identation + str;
+    }
+
+    public void accept(BuilderVisitor vis) {
+        vis.visit(this);
     }
 
 }

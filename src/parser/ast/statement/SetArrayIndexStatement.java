@@ -5,10 +5,10 @@ import parser.ast.interfaces.StatementNode;
 
 public class SetArrayIndexStatement implements StatementNode {
 
-    private int lineAssignment;
-    private String varAssignedName;
-    private ExprNode index;
-    private ExprNode rightHandSide;
+    public final int lineAssignment;
+    public final String varAssignedName;
+    public final ExprNode index;
+    public final ExprNode rightHandSide;
 
     public SetArrayIndexStatement(int lineAssignment, String varAssignedName, ExprNode index, ExprNode rightHandSide) {
         this.lineAssignment = lineAssignment;

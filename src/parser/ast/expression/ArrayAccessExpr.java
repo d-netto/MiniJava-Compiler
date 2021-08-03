@@ -4,8 +4,8 @@ import parser.ast.interfaces.ExprNode;
 
 public class ArrayAccessExpr implements ExprNode {
 
-    private ExprNode array;
-    private ExprNode index;
+    public final ExprNode array;
+    public final ExprNode index;
 
     public ArrayAccessExpr(ExprNode array, ExprNode index) {
         this.array = array;

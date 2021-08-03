@@ -1,0 +1,70 @@
+package semantics;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import org.antlr.v4.runtime.CharStreams;
+import org.junit.Test;
+
+import antlr.MJLexer;
+import parser.MJParser;
+import parser.ast.GoalNode;
+
+public class BuilderVisitorTest {
+
+    // All of the following test files were taken form
+    // https://www.cambridge.org/resources/052182060X/
+    @Test public void TestBinarySearch() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_search.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        GoalNode goal = mjParser.parseGoal();
+        BuilderVisitor builderVis = new BuilderVisitor();
+        goal.accept(builderVis);
+    }
+
+    @Test public void TestBubbleSort() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/bubble_sort.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        GoalNode goal = mjParser.parseGoal();
+        BuilderVisitor builderVis = new BuilderVisitor();
+        goal.accept(builderVis);
+    }
+
+    @Test public void TestQuickSort() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/quick_sort.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        GoalNode goal = mjParser.parseGoal();
+        BuilderVisitor builderVis = new BuilderVisitor();
+        goal.accept(builderVis);
+    }
+
+    @Test public void TestLinear() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linear_search.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        GoalNode goal = mjParser.parseGoal();
+        BuilderVisitor builderVis = new BuilderVisitor();
+        goal.accept(builderVis);
+    }
+
+    @Test public void TestLinkedList() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linked_list.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        GoalNode goal = mjParser.parseGoal();
+        BuilderVisitor builderVis = new BuilderVisitor();
+        goal.accept(builderVis);
+    }
+
+}

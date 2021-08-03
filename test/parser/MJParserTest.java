@@ -3,15 +3,13 @@ package parser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.Test;
 
 import antlr.MJLexer;
-import parser.ast.GoalNode;
-import parser.ast.MethodDeclNode;
-import parser.ast.interfaces.ExprNode;
-import parser.ast.interfaces.StatementNode;
 
 public class MJParserTest {
 
@@ -44,7 +42,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(methodDeclStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        MethodDeclNode methodDecl = mjParser.parseMethodDecl();
+        mjParser.parseMethodDecl();
     }
 
     @Test public void TestArithmeticExpr() throws IOException {
@@ -52,10 +50,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(exprStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        ExprNode expr = mjParser.parseExpr();
-        System.out.println(exprStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseExpr();
     }
 
     @Test public void TestBooleanExpr() throws IOException {
@@ -63,10 +58,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(exprStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        ExprNode expr = mjParser.parseExpr();
-        System.out.println(exprStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseExpr();
     }
 
     @Test public void TestParenthesisExpr() throws IOException {
@@ -74,10 +66,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(exprStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        ExprNode expr = mjParser.parseExpr();
-        System.out.println(exprStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseExpr();
     }
 
     @Test public void TestNewArrayExpr() throws IOException {
@@ -85,10 +74,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(exprStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        ExprNode expr = mjParser.parseExpr();
-        System.out.println(exprStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseExpr();
     }
 
     @Test public void TestNewObjectExpr() throws IOException {
@@ -96,10 +82,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(exprStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        ExprNode expr = mjParser.parseExpr();
-        System.out.println(exprStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseExpr();
     }
 
     @Test public void TestArrayAccess() throws IOException {
@@ -107,10 +90,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(exprStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        ExprNode expr = mjParser.parseExpr();
-        System.out.println(exprStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseExpr();
     }
 
     @Test public void TestMethodCall() throws IOException {
@@ -118,10 +98,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(exprStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        ExprNode expr = mjParser.parseExpr();
-        System.out.println(exprStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseExpr();
     }
 
     @Test public void TestLength() throws IOException {
@@ -129,10 +106,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(exprStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        ExprNode expr = mjParser.parseExpr();
-        System.out.println(exprStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseExpr();
     }
 
     @Test public void TestSetArrayIndex() throws IOException {
@@ -140,10 +114,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(stmtStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        StatementNode stmt = mjParser.parseStatement();
-        System.out.println(stmtStr);
-        System.out.println(stmt.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseStatement();
     }
 
     @Test public void TestSetVar() throws IOException {
@@ -151,10 +122,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(stmtStr.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        StatementNode expr = mjParser.parseStatement();
-        System.out.println(stmtStr);
-        System.out.println(expr.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseStatement();
     }
 
     @Test public void TestSimpleProgram() throws IOException {
@@ -163,10 +131,7 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        GoalNode goal = mjParser.parseGoal();
-        System.out.println(simpleProgram);
-        System.out.println(goal.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseGoal();
     }
 
     @Test public void TestClassOtherThanMain() throws IOException {
@@ -176,10 +141,61 @@ public class MJParserTest {
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
-        GoalNode goal = mjParser.parseGoal();
-        System.out.println(simpleProgram);
-        System.out.println(goal.prettyPrint(""));
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~");
+        mjParser.parseGoal();
+    }
+
+    @Test public void TestFactorial() throws IOException {
+        String simpleProgram = "class Factorial{\n" + "    public static void main(String[] a){\n"
+                + "    System.out.println(new Fac().ComputeFac(10));\n" + "    }\n" + "}\n" + "\n" + "class Fac {\n"
+                + "\n" + "    public int ComputeFac(int num){\n" + "    int num_aux ;\n" + "    if (num < 1)\n"
+                + "        num_aux = 1 ;\n" + "    else \n" + "        num_aux = num * (this.ComputeFac(num-1)) ;\n"
+                + "    return num_aux ;\n" + "    }\n" + "\n" + "}";
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseGoal();
+    }
+
+    // All of the following test files were taken form
+    // https://www.cambridge.org/resources/052182060X/
+    @Test public void TestBinarySearch() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_search.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseGoal();
+    }
+
+    @Test public void TestBubbleSort() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/bubble_sort.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseGoal();
+    }
+
+    @Test public void TestQuickSort() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/quick_sort.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseGoal();
+    }
+
+    @Test public void TestLinear() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linear_search.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseGoal();
+    }
+
+    @Test public void TestLinkedList() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linked_list.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseGoal();
     }
 
 }

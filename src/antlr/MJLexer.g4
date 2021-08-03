@@ -49,8 +49,8 @@ INT_LITERAL: [0-9]+;
 COMMA: ',';
 SEMI_COLON: ';';
 
-WS: [ \t\r\n]+ -> skip;
-COMMENT: '//' [~WS]* -> skip;
+WS: [ \n\r\t]+ -> skip;
+COMMENT: '//' (~[\n\r])* -> skip;
 
 
 

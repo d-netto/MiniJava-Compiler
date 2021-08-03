@@ -4,7 +4,7 @@ import parser.ast.interfaces.ExprNode;
 
 public class NotExpr implements ExprNode {
 
-    private ExprNode argument;
+    public final ExprNode argument;
 
     public NotExpr(ExprNode argument) {
         this.argument = argument;

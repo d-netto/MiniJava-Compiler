@@ -1,19 +1,22 @@
 package parser.ast;
 
 import java.util.List;
+import java.util.Map;
 
 import parser.MJParser.Pair;
 import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
+import semantics.BuilderVisitor;
+import semantics.types.MethodType;
 
 public class MethodDeclNode {
 
-    private String methodType;
-    private String methodName;
-    private List<Pair<String, String>> methodArgs;
-    private List<VarDeclNode> varDecls;
-    private List<StatementNode> statements;
-    private ExprNode returnExpr;
+    public final String methodType;
+    public final String methodName;
+    public final List<Pair<String, String>> methodArgs;
+    public final List<VarDeclNode> varDecls;
+    public final List<StatementNode> statements;
+    public final ExprNode returnExpr;
 
     public MethodDeclNode(String methodType, String methodName, List<Pair<String, String>> methodArgs,
             List<VarDeclNode> varDecls, List<StatementNode> statements, ExprNode returnExpr) {
@@ -39,6 +42,10 @@ public class MethodDeclNode {
         }
         str += "\n" + returnExpr.prettyPrint(identation + "\t");
         return identation + str;
+    }
+
+    public void accept(BuilderVisitor vis, Map<String, MethodType> fields) {
+        vis.visit(this, fields);
     }
 
 }

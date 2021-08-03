@@ -3,12 +3,14 @@ package parser.ast;
 import java.util.List;
 import java.util.Optional;
 
+import semantics.BuilderVisitor;
+
 public class ClassNode {
 
-    private String className;
-    private Optional<String> extendsFrom;
-    private List<VarDeclNode> varDecls;
-    private List<MethodDeclNode> methodDecls;
+    public final String className;
+    public final Optional<String> extendsFrom;
+    public final List<VarDeclNode> varDecls;
+    public final List<MethodDeclNode> methodDecls;
 
     public ClassNode(String className, Optional<String> extendsFrom, List<VarDeclNode> varDecls,
             List<MethodDeclNode> methodDecls) {
@@ -27,6 +29,10 @@ public class ClassNode {
             str += "\n" + methodDecl.prettyPrint(identation + "\t");
         }
         return identation + str;
+    }
+
+    public void accept(BuilderVisitor vis) {
+        vis.visit(this);
     }
 
 }

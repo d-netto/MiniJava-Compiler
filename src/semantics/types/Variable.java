@@ -10,9 +10,4 @@ public class Variable {
         this.hasBeenSet = false;
     }
 
-    @Override public boolean equals(Object otherVariable) {
-        return otherVariable instanceof Variable && type.equals(((Variable) otherVariable).type)
-                && hasBeenSet == ((Variable) otherVariable).hasBeenSet;
-    }
-
 }

@@ -10,6 +10,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Lexer;
 import org.junit.Test;
 
+import antlr_lexer.MJLexer;
+
 public class MJLexerTest {
 
     @Test public void TestClassKW() throws IOException {

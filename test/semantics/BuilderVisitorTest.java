@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.Test;
 
-import antlr.MJLexer;
+import antlr_lexer.MJLexer;
 import parser.MJParser;
 import parser.ast.GoalNode;
 

@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
-import antlr.MJLexer;
+import antlr_lexer.MJLexer;
 import parser.ast.ClassNode;
 import parser.ast.GoalNode;
 import parser.ast.MethodDeclNode;

@@ -162,7 +162,9 @@ public class MJParser {
             classes.add(parseClass());
         }
         Token shouldBeEOF = nextToken();
-        assert shouldBeEOF.getType() == MJLexer.EOF : "Expected end of file but got \"" + shouldBeEOF.getText() + "\"";
+        assert shouldBeEOF.getType() == MJLexer.EOF : String.format(
+                "Expected end of file but got token \"%s\" with text \"%s\"", shouldBeEOF.getText(),
+                ruleNames[shouldBeEOF.getType() - 1]);
         return new GoalNode(mainClassName.getText(), argName, statement, classes);
     }
 
@@ -188,8 +190,8 @@ public class MJParser {
 
     public VarDeclNode parseVarDecl() {
         Token type = nextToken();
-        assert types.contains(type.getType()) : "Expected \"int\", \"boolean\" or some identifier in line "
-                + type.getLine();
+        assert types.contains(type.getType()) : String
+                .format("Expected \"int\", \"boolean\" or some identifier in line %d", type.getLine());
         Token varName = handleTokenTypeCheck(MJLexer.ID);
         handleTokenTypeCheck(MJLexer.SEMI_COLON);
         return new VarDeclNode(type.getLine(), type.getText(), varName.getText());
@@ -198,22 +200,22 @@ public class MJParser {
     public MethodDeclNode parseMethodDecl() {
         handleTokenTypeCheck(MJLexer.PUBLIC_KW);
         Token methodType = nextToken();
-        assert types.contains(methodType.getType()) : "Expected \"int\", \"boolean\" or some identifier in line "
-                + methodType.getLine();
+        assert types.contains(methodType.getType()) : String
+                .format("Expected \"int\", \"boolean\" or some identifier in line %d", methodType.getLine());
         Token methodName = handleTokenTypeCheck(MJLexer.ID);
         handleTokenTypeCheck(MJLexer.LPARENS);
         List<Pair<String, String>> methodArgs = new ArrayList<>();
         if (types.contains(lookahead(1).getType())) {
             Token argType = nextToken();
-            assert types.contains(argType.getType()) : "Expected \"int\", \"boolean\" or some identifier in line "
-                    + argType.getLine();
+            assert types.contains(argType.getType()) : String
+                    .format("Expected \"int\", \"boolean\" or some identifier in line %d", argType.getLine());
             Token argName = handleTokenTypeCheck(MJLexer.ID);
             methodArgs.add(new Pair<>(argType.getText(), argName.getText()));
             while (lookahead(1).getType() == MJLexer.COMMA) {
                 handleTokenTypeCheck(MJLexer.COMMA);
                 argType = nextToken();
-                assert types.contains(argType.getType()) : "Expected \"int\", \"boolean\" or some identifier in line "
-                        + argType.getLine();
+                assert types.contains(argType.getType()) : String
+                        .format("Expected \"int\", \"boolean\" or some identifier in line %d", argType.getLine());
                 argName = handleTokenTypeCheck(MJLexer.ID);
                 methodArgs.add(new Pair<>(argType.getText(), argName.getText()));
             }
@@ -281,8 +283,8 @@ public class MJParser {
                 return new SetArrayIndexStatement(oneAhead.getLine(), oneAhead.getText(), arrayExpr, index);
             }
         default:
-            throw new RuntimeException(
-                    "Error while trying to parse " + oneAhead.getText() + " symbol in line " + oneAhead.getLine());
+            throw new RuntimeException(String.format("Error while trying to parse \"%s\" symbol in line %d",
+                    oneAhead.getText(), oneAhead.getLine()));
 
         }
     }
@@ -318,7 +320,8 @@ public class MJParser {
                 handleTokenTypeCheck(MJLexer.RPARENS);
                 head = new NewObjectDeclExpr(twoAhead.getText());
             } else {
-                throw new RuntimeException("Failed while trying to parse \"new ...\" in line " + oneAhead.getLine());
+                throw new RuntimeException(
+                        String.format("Failed while trying to parse \"new ...\" in line %d", oneAhead.getLine()));
             }
             break;
         case MJLexer.NOT:
@@ -330,8 +333,9 @@ public class MJParser {
             handleTokenTypeCheck(MJLexer.RPARENS);
             break;
         default:
-            throw new RuntimeException("Failed while trying to parse \"factor\" in line " + oneAhead.getLine()
-                    + ". Got " + oneAhead.getText() + " instead");
+            throw new RuntimeException(
+                    String.format("Failed while trying to parse \"factor\" in line %d. Got \"%s\" instead\"",
+                            oneAhead.getLine(), oneAhead.getText()));
         }
         switch (lookahead(1).getType()) {
         case MJLexer.LBRACKET:
@@ -365,8 +369,8 @@ public class MJParser {
                 handleTokenTypeCheck(MJLexer.RPARENS);
                 head = new MethodCallExpr(head, args);
             } else {
-                throw new RuntimeException(
-                        "Failed while trying to parse expression of form \"A.B\" in line " + oneAhead.getLine());
+                throw new RuntimeException(String.format(
+                        "Failed while trying to parse expression of form \"A.B\" in line %d", oneAhead.getLine()));
             }
             break;
         }

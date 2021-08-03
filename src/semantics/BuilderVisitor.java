@@ -46,7 +46,7 @@ public class BuilderVisitor {
 
     public void addClassType(String className, ClassType classType) {
         if (classSymbolTable.containsKey(className)) {
-            throw new RuntimeException("Class \"%s\" has been declared twice");
+            throw new RuntimeException(String.format("Class \"%s\" has been declared twice", className));
         }
         classSymbolTable.put(className, classType);
     }

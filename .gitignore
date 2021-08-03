@@ -11,3 +11,5 @@
 *.project
 
 bin/
+
+target/

@@ -1,4 +1,4 @@
-package antlr;
+package antlr_lexer;
 
 import static org.junit.Assert.assertEquals;
 

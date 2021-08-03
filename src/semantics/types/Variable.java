@@ -10,4 +10,8 @@ public class Variable {
         this.hasBeenSet = false;
     }
 
+    @Override public int hashCode() {
+        return type.hashCode() + (hasBeenSet ? 0 : 1);
+    }
+
 }

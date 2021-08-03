@@ -20,6 +20,10 @@ public class ClassType implements Type {
                 && fields.equals(((ClassType) otherType).fields) && methods.equals(((ClassType) otherType).methods);
     }
 
+    @Override public int hashCode() {
+        return extendsFrom.hashCode() + fields.hashCode() + methods.hashCode();
+    }
+
     public boolean containsClassAsParent(ClassType otherClassType) {
         if (this.equals(otherClassType)) {
             return false;

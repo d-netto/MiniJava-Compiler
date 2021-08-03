@@ -20,4 +20,8 @@ public class MethodType {
                 && variablesDeclared.equals(((MethodType) otherType).variablesDeclared);
     }
 
+    @Override public int hashCode() {
+        return returnType.hashCode() + arguments.hashCode() + variablesDeclared.hashCode();
+    }
+
 }

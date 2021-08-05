@@ -5,6 +5,7 @@ import java.util.List;
 
 import parser.ast.interfaces.StatementNode;
 import semantics.BuilderVisitor;
+import semantics.TypesVisitor;
 
 public class GoalNode {
 
@@ -18,6 +19,10 @@ public class GoalNode {
         this.argName = argName;
         this.statement = statement;
         this.classes = classes;
+    }
+
+    public StatementNode getStatement() {
+        return statement;
     }
 
     public List<ClassNode> getClasses() {
@@ -35,6 +40,10 @@ public class GoalNode {
     }
 
     public void accept(BuilderVisitor vis) {
+        vis.visit(this);
+    }
+
+    public void accept(TypesVisitor vis) {
         vis.visit(this);
     }
 

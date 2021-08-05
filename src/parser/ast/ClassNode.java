@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import semantics.BuilderVisitor;
+import semantics.TypesVisitor;
 
 public class ClassNode {
 
@@ -49,6 +50,10 @@ public class ClassNode {
     }
 
     public void accept(BuilderVisitor vis) {
+        vis.visit(this);
+    }
+
+    public void accept(TypesVisitor vis) {
         vis.visit(this);
     }
 

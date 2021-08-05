@@ -7,6 +7,7 @@ import java.util.Map;
 import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
 import semantics.BuilderVisitor;
+import semantics.TypesVisitor;
 import semantics.types.MethodType;
 import utils.Pair;
 
@@ -45,6 +46,14 @@ public class MethodDeclNode {
         return new ArrayList<>(varDecls);
     }
 
+    public List<StatementNode> getStatements() {
+        return new ArrayList<>(statements);
+    }
+
+    public ExprNode getReturnExpr() {
+        return returnExpr;
+    }
+
     public String prettyPrint(String identation) {
         String str = "MethodDeclNode:" + "\n" + identation + "\t" + methodType;
         str += "\n" + identation + "\t" + methodName;
@@ -63,6 +72,10 @@ public class MethodDeclNode {
 
     public void accept(BuilderVisitor vis, Map<String, MethodType> fields) {
         vis.visit(this, fields);
+    }
+
+    public void accept(TypesVisitor vis) {
+        vis.visit(this);
     }
 
 }

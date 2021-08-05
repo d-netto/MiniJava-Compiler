@@ -12,6 +12,10 @@ public class NotExpr implements ExprNode {
         this.argument = argument;
     }
 
+    public ExprNode getArgument() {
+        return argument;
+    }
+
     public String prettyPrint(String identation) {
         return identation + "NotExpr:" + "\n" + argument.prettyPrint(identation + "\t");
     }

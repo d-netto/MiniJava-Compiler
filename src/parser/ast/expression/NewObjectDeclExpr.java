@@ -12,6 +12,10 @@ public class NewObjectDeclExpr implements ExprNode {
         this.objName = objName;
     }
 
+    public String getObjectName() {
+        return objName;
+    }
+
     public String prettyPrint(String identation) {
         return identation + "NewObjectDeclExpr:" + "\n" + identation + "\t" + objName;
     }

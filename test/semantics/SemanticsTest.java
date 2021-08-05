@@ -13,7 +13,7 @@ import antlr_lexer.MJLexer;
 import parser.MJParser;
 import parser.ast.GoalNode;
 
-public class BuilderVisitorTest {
+public class SemanticsTest {
 
     // All of the following test files were taken form
     // https://www.cambridge.org/resources/052182060X/
@@ -25,6 +25,8 @@ public class BuilderVisitorTest {
         GoalNode goal = mjParser.parseGoal();
         BuilderVisitor builderVis = new BuilderVisitor();
         goal.accept(builderVis);
+        TypesVisitor typesVis = new TypesVisitor(builderVis);
+        goal.accept(typesVis);
     }
 
     @Test public void TestBubbleSort() throws IOException {
@@ -35,6 +37,8 @@ public class BuilderVisitorTest {
         GoalNode goal = mjParser.parseGoal();
         BuilderVisitor builderVis = new BuilderVisitor();
         goal.accept(builderVis);
+        TypesVisitor typesVis = new TypesVisitor(builderVis);
+        goal.accept(typesVis);
     }
 
     @Test public void TestQuickSort() throws IOException {
@@ -45,6 +49,8 @@ public class BuilderVisitorTest {
         GoalNode goal = mjParser.parseGoal();
         BuilderVisitor builderVis = new BuilderVisitor();
         goal.accept(builderVis);
+        TypesVisitor typesVis = new TypesVisitor(builderVis);
+        goal.accept(typesVis);
     }
 
     @Test public void TestLinear() throws IOException {
@@ -55,6 +61,8 @@ public class BuilderVisitorTest {
         GoalNode goal = mjParser.parseGoal();
         BuilderVisitor builderVis = new BuilderVisitor();
         goal.accept(builderVis);
+        TypesVisitor typesVis = new TypesVisitor(builderVis);
+        goal.accept(typesVis);
     }
 
     @Test public void TestLinkedList() throws IOException {
@@ -65,6 +73,8 @@ public class BuilderVisitorTest {
         GoalNode goal = mjParser.parseGoal();
         BuilderVisitor builderVis = new BuilderVisitor();
         goal.accept(builderVis);
+        TypesVisitor typesVis = new TypesVisitor(builderVis);
+        goal.accept(typesVis);
     }
 
 }

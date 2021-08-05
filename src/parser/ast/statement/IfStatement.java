@@ -2,6 +2,7 @@ package parser.ast.statement;
 
 import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
+import semantics.TypesVisitor;
 
 public class IfStatement implements StatementNode {
 
@@ -15,9 +16,25 @@ public class IfStatement implements StatementNode {
         this.elseBlock = elseBlock;
     }
 
+    public ExprNode getIfCondition() {
+        return ifCondition;
+    }
+
+    public StatementNode getIfBlock() {
+        return ifBlock;
+    }
+
+    public StatementNode getElseBlock() {
+        return elseBlock;
+    }
+
     public String prettyPrint(String identation) {
         return identation + "IfStatement:" + "\n" + ifCondition.prettyPrint(identation + "\t") + "\n"
                 + ifBlock.prettyPrint(identation + "\t") + "\n" + elseBlock.prettyPrint(identation + "\t");
+    }
+
+    public void accept(TypesVisitor vis) {
+        vis.visit(this);
     }
 
 }

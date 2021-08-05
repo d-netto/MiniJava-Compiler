@@ -3,6 +3,7 @@ package parser.ast;
 import java.util.Map;
 
 import semantics.BuilderVisitor;
+import semantics.TypesVisitor;
 import semantics.types.Variable;
 
 public class VarDeclNode {
@@ -31,6 +32,10 @@ public class VarDeclNode {
 
     public void accept(BuilderVisitor vis, Map<String, Variable> fields) {
         vis.visit(this, fields);
+    }
+
+    public void accept(TypesVisitor vis) {
+        vis.visit(this);
     }
 
 }

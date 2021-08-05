@@ -2,6 +2,10 @@ package semantics;
 
 import java.util.List;
 
+import parser.ast.ClassNode;
+import parser.ast.GoalNode;
+import parser.ast.MethodDeclNode;
+import parser.ast.VarDeclNode;
 import parser.ast.expression.ArrayAccessExpr;
 import parser.ast.expression.LengthExpr;
 import parser.ast.expression.MethodCallExpr;
@@ -20,11 +24,19 @@ import parser.ast.expression.singletons.FalseExpr;
 import parser.ast.expression.singletons.ThisExpr;
 import parser.ast.expression.singletons.TrueExpr;
 import parser.ast.interfaces.ExprNode;
+import parser.ast.interfaces.StatementNode;
+import parser.ast.statement.BlockStatement;
+import parser.ast.statement.IfStatement;
+import parser.ast.statement.PrintStatement;
+import parser.ast.statement.SetArrayIndexStatement;
+import parser.ast.statement.SetVariableStatement;
+import parser.ast.statement.WhileStatement;
 import semantics.types.ClassType;
 import semantics.types.MethodType;
 import semantics.types.Type;
 import semantics.types.Variable;
 import semantics.types.base_types.BooleanType;
+import semantics.types.base_types.IntArrayType;
 import semantics.types.base_types.IntType;
 import utils.Pair;
 
@@ -34,10 +46,16 @@ public class TypesVisitor {
     private MethodType currentMethod;
     private BuilderVisitor builderVis;
 
-    private Type getVar(String name) {
+    public TypesVisitor(BuilderVisitor builderVis) {
+        this.currentClass = null;
+        this.currentMethod = null;
+        this.builderVis = builderVis;
+    }
+
+    private Variable getVar(String name) {
         if (currentMethod != null) {
             if (currentMethod.getVarsDecl().containsKey(name)) {
-                return currentMethod.getVarsDecl().get(name).getType();
+                return currentMethod.getVarsDecl().get(name);
             } else {
                 for (Pair<String, Variable> pair : currentMethod.getArguments()) {
                     if (pair.first().equals(name)) {
@@ -45,14 +63,15 @@ public class TypesVisitor {
                     }
                 }
             }
-        } else if (currentClass != null && currentClass.getFields().containsKey(name)) {
+        }
+        if (currentClass != null && currentClass.getFields().containsKey(name)) {
             return currentClass.getFields().get(name);
         }
         throw new AssertionError(String.format("Variable \"%s\" was not defined", name));
     }
 
     public Type visit(IdentifierExpr expr) {
-        return getVar(expr.getIdentifierName());
+        return getVar(expr.getIdentifierName()).getType();
     }
 
     public Type visit(IntExpr expr) {
@@ -85,10 +104,15 @@ public class TypesVisitor {
 
     public Type visit(DotExpr expr) {
         ExprNode leftHandSide = expr.getLeftHandSide();
-        IdentifierExpr rightHandSide = (IdentifierExpr) expr.getLeftHandSide();
+        IdentifierExpr rightHandSide = (IdentifierExpr) expr.getRightHandSide();
         String rightHandSideName = rightHandSide.getIdentifierName();
-        if (leftHandSide instanceof IdentifierExpr) {
-            String className = ((IdentifierExpr) leftHandSide).getIdentifierName();
+        if (leftHandSide instanceof ThisExpr) {
+            return currentClass.getMethods().get(rightHandSideName);
+        } else if (leftHandSide instanceof IdentifierExpr) {
+            String varName = ((IdentifierExpr) leftHandSide).getIdentifierName();
+            return ((ClassType) getVar(varName).getType()).getMethods().get(rightHandSideName);
+        } else if (leftHandSide instanceof NewObjectDeclExpr) {
+            String className = ((NewObjectDeclExpr) leftHandSide).getObjectName();
             return builderVis.getClassType(className).getMethods().get(rightHandSideName);
         }
         Type leftHandSideType = leftHandSide.accept(this);
@@ -96,7 +120,7 @@ public class TypesVisitor {
         ClassType classType = (ClassType) leftHandSideType;
         assert classType.getFields().containsKey(rightHandSideName) : String
                 .format("Field \"%s\" has not been defined in class", rightHandSideName);
-        return classType.getFields().get(rightHandSideName);
+        return classType.getMethods().get(rightHandSideName);
     }
 
     public Type visit(LtExpr expr) {
@@ -135,23 +159,87 @@ public class TypesVisitor {
         assert argListForExpr.size() == args.size() : "Number of arguments mismatch";
         for (int i = 0; i < argListForExpr.size(); i++) {
             Type argType = argListForExpr.get(i).accept(this);
-            assert argType.isVariableType() : "Internal error in MethodCallExpr";
-
-            assert argType.equals(args.get(i).second()) : "Type mismatch in argument call";
+            assert argType.equals(args.get(i).second().getType()) : String.format("Type mismatch in argument call %s",
+                    expr.prettyPrint(""));
         }
         return ((MethodType) method).getReturnType();
     }
 
     public Type visit(NewArrayDeclExpr expr) {
-        return currentClass;
+        return new IntArrayType();
     }
 
     public Type visit(NewObjectDeclExpr expr) {
-        return currentClass;
+        return builderVis.getClassType(expr.getObjectName());
     }
 
     public Type visit(NotExpr expr) {
-        return currentClass;
+        assert expr.getArgument().accept(this).isBooleanType() : "Type mismatch";
+        return new BooleanType();
+    }
+
+    public void visit(BlockStatement statement) {
+        for (StatementNode statementNode : statement.getStatements()) {
+            statementNode.accept(this);
+        }
+    }
+
+    public void visit(IfStatement statement) {
+        assert statement.getIfCondition().accept(this).isBooleanType() : "Type mismatch";
+        statement.getIfBlock().accept(this);
+        statement.getElseBlock().accept(this);
+    }
+
+    public void visit(PrintStatement statement) {
+        assert statement.getPrintExpr().accept(this).isIntType() : "Type mismatch";
+    }
+
+    public void visit(SetArrayIndexStatement statement) {
+        assert getVar(statement.getVarAssignedName()).getType().isIntArrayType() : "Type mismatch";
+        assert statement.getIndex().accept(this).isIntType() : "Type mismatch";
+        assert statement.getRightHandSide().accept(this).isIntType() : "Type mismatch";
+    }
+
+    public void visit(SetVariableStatement statement) {
+        assert getVar(statement.getVarAssignedName()).getType()
+                .equals(statement.getRightHandSide().accept(this)) : "Type mismatch";
+    }
+
+    public void visit(WhileStatement statement) {
+        assert statement.getWhileCondition().accept(this).isBooleanType() : "Type mismatch";
+        statement.getWhileBlock().accept(this);
+    }
+
+    public void visit(ClassNode node) {
+        for (VarDeclNode varDecl : node.getVarDecls()) {
+            varDecl.accept(this);
+        }
+        for (MethodDeclNode methodDecl : node.getMethodDecls()) {
+            methodDecl.accept(this);
+        }
+    }
+
+    public void visit(GoalNode node) {
+        node.getStatement().accept(this);
+        for (ClassNode classNode : node.getClasses()) {
+            currentClass = builderVis.getClassType(classNode.getClassName());
+            classNode.accept(this);
+        }
+    }
+
+    public void visit(MethodDeclNode node) {
+        currentMethod = currentClass.getMethods().get(node.getMethodName());
+        for (VarDeclNode varDecl : node.getVarDecls()) {
+            varDecl.accept(this);
+        }
+        for (StatementNode statement : node.getStatements()) {
+            statement.accept(this);
+        }
+        assert builderVis.getType(node.getMethodType()).equals(node.getReturnExpr().accept(this)) : "Type mismatch";
+    }
+
+    public void visit(VarDeclNode node) {
+        return;
     }
 
 }

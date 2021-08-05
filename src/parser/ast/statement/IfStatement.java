@@ -5,9 +5,9 @@ import parser.ast.interfaces.StatementNode;
 
 public class IfStatement implements StatementNode {
 
-    public final ExprNode ifCondition;
-    public final StatementNode ifBlock;
-    public final StatementNode elseBlock;
+    private final ExprNode ifCondition;
+    private final StatementNode ifBlock;
+    private final StatementNode elseBlock;
 
     public IfStatement(ExprNode ifCondition, StatementNode ifBlock, StatementNode elseBlock) {
         this.ifCondition = ifCondition;

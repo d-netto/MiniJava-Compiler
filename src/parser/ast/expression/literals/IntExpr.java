@@ -1,10 +1,12 @@
 package parser.ast.expression.literals;
 
 import parser.ast.interfaces.ExprNode;
+import semantics.TypesVisitor;
+import semantics.types.Type;
 
 public class IntExpr implements ExprNode {
 
-    public final String integerVal;
+    private final String integerVal;
 
     public IntExpr(String integerVal) {
         this.integerVal = integerVal;
@@ -12,6 +14,10 @@ public class IntExpr implements ExprNode {
 
     public String prettyPrint(String identation) {
         return identation + "IntExpr: " + integerVal;
+    }
+
+    public Type accept(TypesVisitor vis) {
+        return vis.visit(this);
     }
 
 }

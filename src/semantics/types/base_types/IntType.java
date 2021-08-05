@@ -2,7 +2,7 @@ package semantics.types.base_types;
 
 import semantics.types.Type;
 
-public class IntType implements Type {
+public class IntType extends Type {
 
     @Override public boolean equals(Object otherType) {
         return otherType instanceof IntType;
@@ -10,6 +10,10 @@ public class IntType implements Type {
 
     @Override public int hashCode() {
         return 44;
+    }
+
+    @Override public boolean isIntType() {
+        return true;
     }
 
 }

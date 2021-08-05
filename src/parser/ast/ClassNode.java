@@ -1,5 +1,6 @@
 package parser.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,10 +8,10 @@ import semantics.BuilderVisitor;
 
 public class ClassNode {
 
-    public final String className;
-    public final Optional<String> extendsFrom;
-    public final List<VarDeclNode> varDecls;
-    public final List<MethodDeclNode> methodDecls;
+    private final String className;
+    private final Optional<String> extendsFrom;
+    private final List<VarDeclNode> varDecls;
+    private final List<MethodDeclNode> methodDecls;
 
     public ClassNode(String className, Optional<String> extendsFrom, List<VarDeclNode> varDecls,
             List<MethodDeclNode> methodDecls) {
@@ -18,6 +19,22 @@ public class ClassNode {
         this.extendsFrom = extendsFrom;
         this.varDecls = varDecls;
         this.methodDecls = methodDecls;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public Optional<String> getExtendsFrom() {
+        return extendsFrom;
+    }
+
+    public List<VarDeclNode> getVarDecls() {
+        return new ArrayList<>(varDecls);
+    }
+
+    public List<MethodDeclNode> getMethodDecls() {
+        return new ArrayList<>(methodDecls);
     }
 
     public String prettyPrint(String identation) {

@@ -5,9 +5,9 @@ import parser.ast.interfaces.StatementNode;
 
 public class SetVariableStatement implements StatementNode {
 
-    public final int lineAssignment;
-    public final String varAssignedName;
-    public final ExprNode rightHandSide;
+    private final int lineAssignment;
+    private final String varAssignedName;
+    private final ExprNode rightHandSide;
 
     public SetVariableStatement(int lineAssignment, String varAssignedName, ExprNode rightHandSide) {
         this.lineAssignment = lineAssignment;

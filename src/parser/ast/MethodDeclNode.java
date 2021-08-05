@@ -1,22 +1,23 @@
 package parser.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import parser.MJParser.Pair;
 import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
 import semantics.BuilderVisitor;
 import semantics.types.MethodType;
+import utils.Pair;
 
 public class MethodDeclNode {
 
-    public final String methodType;
-    public final String methodName;
-    public final List<Pair<String, String>> methodArgs;
-    public final List<VarDeclNode> varDecls;
-    public final List<StatementNode> statements;
-    public final ExprNode returnExpr;
+    private final String methodType;
+    private final String methodName;
+    private final List<Pair<String, String>> methodArgs;
+    private final List<VarDeclNode> varDecls;
+    private final List<StatementNode> statements;
+    private final ExprNode returnExpr;
 
     public MethodDeclNode(String methodType, String methodName, List<Pair<String, String>> methodArgs,
             List<VarDeclNode> varDecls, List<StatementNode> statements, ExprNode returnExpr) {
@@ -26,6 +27,22 @@ public class MethodDeclNode {
         this.varDecls = varDecls;
         this.statements = statements;
         this.returnExpr = returnExpr;
+    }
+
+    public String getMethodType() {
+        return methodType;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public List<Pair<String, String>> getMethodArgs() {
+        return new ArrayList<>(methodArgs);
+    }
+
+    public List<VarDeclNode> getVarDecls() {
+        return new ArrayList<>(varDecls);
     }
 
     public String prettyPrint(String identation) {

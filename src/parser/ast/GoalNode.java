@@ -1,5 +1,6 @@
 package parser.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import parser.ast.interfaces.StatementNode;
@@ -7,16 +8,20 @@ import semantics.BuilderVisitor;
 
 public class GoalNode {
 
-    public final String mainClassName;
-    public final String argName;
-    public final StatementNode statement;
-    public final List<ClassNode> classes;
+    private final String mainClassName;
+    private final String argName;
+    private final StatementNode statement;
+    private final List<ClassNode> classes;
 
     public GoalNode(String mainClassName, String argName, StatementNode statement, List<ClassNode> classes) {
         this.mainClassName = mainClassName;
         this.argName = argName;
         this.statement = statement;
         this.classes = classes;
+    }
+
+    public List<ClassNode> getClasses() {
+        return new ArrayList<>(classes);
     }
 
     public String prettyPrint(String identation) {

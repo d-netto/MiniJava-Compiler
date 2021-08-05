@@ -1,10 +1,13 @@
 package semantics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
-import parser.MJParser.Pair;
 import parser.ast.ClassNode;
 import parser.ast.GoalNode;
 import parser.ast.MethodDeclNode;
@@ -16,6 +19,7 @@ import semantics.types.Variable;
 import semantics.types.base_types.BooleanType;
 import semantics.types.base_types.IntArrayType;
 import semantics.types.base_types.IntType;
+import utils.Pair;
 
 public class BuilderVisitor {
 
@@ -25,11 +29,15 @@ public class BuilderVisitor {
         this.classSymbolTable = new HashMap<>();
     }
 
+    public Map<String, ClassType> getClassSymbolTable() {
+        return new HashMap<>(classSymbolTable);
+    }
+
     public ClassType getClassType(String className) {
         if (classSymbolTable.containsKey(className)) {
             return classSymbolTable.get(className);
         }
-        throw new RuntimeException("Semantic error: Class " + className + " was not declared");
+        throw new AssertionError("Semantic error: Class " + className + " was not declared");
     }
 
     public Type getType(String className) {
@@ -46,53 +54,56 @@ public class BuilderVisitor {
 
     public void addClassType(String className, ClassType classType) {
         if (classSymbolTable.containsKey(className)) {
-            throw new RuntimeException(String.format("Class \"%s\" has been declared twice", className));
+            throw new AssertionError(String.format("Class \"%s\" has been declared twice", className));
         }
         classSymbolTable.put(className, classType);
     }
 
     public void visit(GoalNode node) {
-        for (ClassNode classNode : node.classes) {
+        for (ClassNode classNode : node.getClasses()) {
             classNode.accept(this);
         }
     }
 
     public void visit(ClassNode node) {
         Optional<ClassType> extendsFrom = Optional.empty();
-        if (node.extendsFrom.isPresent()) {
-            extendsFrom = Optional.of(getClassType(node.extendsFrom.get()));
+        if (node.getExtendsFrom().isPresent()) {
+            extendsFrom = Optional.of(getClassType(node.getExtendsFrom().get()));
         }
         Map<String, Variable> fields = new HashMap<>();
         Map<String, MethodType> methods = new HashMap<>();
         ClassType thisClass = new ClassType(extendsFrom, fields, methods);
-        addClassType(node.className, thisClass);
-        for (VarDeclNode varDecl : node.varDecls) {
+        addClassType(node.getClassName(), thisClass);
+        for (VarDeclNode varDecl : node.getVarDecls()) {
             varDecl.accept(this, fields);
         }
-        for (MethodDeclNode methodDecl : node.methodDecls) {
+        for (MethodDeclNode methodDecl : node.getMethodDecls()) {
             methodDecl.accept(this, methods);
         }
     }
 
     public void visit(VarDeclNode node, Map<String, Variable> fields) {
-        Type varType = getType(node.varType);
-        fields.put(node.varName, new Variable(varType));
+        Type varType = getType(node.getVarType());
+        fields.put(node.getVarName(), new Variable(varType));
     }
 
     public void visit(MethodDeclNode node, Map<String, MethodType> methods) {
-        Type returnType = getType(node.methodType);
-        Map<String, Variable> arguments = new HashMap<>();
-        for (Pair<String, String> argument : node.methodArgs) {
-            arguments.put(argument.second(), new Variable(getType(argument.first())));
+        Type returnType = getType(node.getMethodType());
+        Set<String> varNames = new HashSet<>();
+        List<Pair<String, Variable>> arguments = new ArrayList<>();
+        for (Pair<String, String> argument : node.getMethodArgs()) {
+            varNames.add(argument.second());
+            arguments.add(new Pair<String, Variable>(argument.second(), new Variable(getType(argument.first()))));
         }
-        Map<String, Variable> variablesDeclared = new HashMap<>();
-        for (VarDeclNode varDecl : node.varDecls) {
-            if (arguments.containsKey(varDecl.varName) || variablesDeclared.containsKey(varDecl.varName)) {
-                throw new RuntimeException("Variable " + varDecl.varName + " has already been declared");
+        Map<String, Variable> varsDecls = new HashMap<>();
+        for (VarDeclNode varDecl : node.getVarDecls()) {
+            if (varNames.contains(varDecl.getVarName()) || varsDecls.containsKey(varDecl.getVarName())) {
+                throw new AssertionError(
+                        String.format("Variable  \"%s\" has already been declared", varDecl.getVarName()));
             }
-            varDecl.accept(this, variablesDeclared);
+            varDecl.accept(this, varsDecls);
         }
-        methods.put(node.methodName, new MethodType(returnType, arguments, variablesDeclared));
+        methods.put(node.getMethodName(), new MethodType(returnType, arguments, varsDecls));
     }
 
 }

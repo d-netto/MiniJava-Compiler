@@ -1,27 +1,49 @@
 package semantics.types;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class MethodType {
+import utils.Pair;
 
-    public final Type returnType;
-    public final Map<String, Variable> arguments;
-    public final Map<String, Variable> variablesDeclared;
+public class MethodType extends Type {
 
-    public MethodType(Type returnType, Map<String, Variable> arguments, Map<String, Variable> variablesDeclared) {
+    private final Type returnType;
+    private final List<Pair<String, Variable>> arguments;
+    private final Map<String, Variable> varsDecl;
+
+    public MethodType(Type returnType, List<Pair<String, Variable>> arguments,
+            Map<String, Variable> variablesDeclared) {
         this.returnType = returnType;
         this.arguments = arguments;
-        this.variablesDeclared = variablesDeclared;
+        this.varsDecl = variablesDeclared;
     }
 
     @Override public boolean equals(Object otherType) {
         return otherType instanceof MethodType && returnType.equals(((MethodType) otherType).returnType)
                 && arguments.equals(((MethodType) otherType).arguments)
-                && variablesDeclared.equals(((MethodType) otherType).variablesDeclared);
+                && varsDecl.equals(((MethodType) otherType).varsDecl);
     }
 
     @Override public int hashCode() {
-        return returnType.hashCode() + arguments.hashCode() + variablesDeclared.hashCode();
+        return returnType.hashCode() + arguments.hashCode() + varsDecl.hashCode();
+    }
+
+    @Override public boolean isMethodType() {
+        return true;
+    }
+
+    public Type getReturnType() {
+        return returnType;
+    }
+
+    public List<Pair<String, Variable>> getArguments() {
+        return new ArrayList<>(arguments);
+    }
+
+    public Map<String, Variable> getVarsDecl() {
+        return new HashMap<>(varsDecl);
     }
 
 }

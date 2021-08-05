@@ -7,14 +7,22 @@ import semantics.types.Variable;
 
 public class VarDeclNode {
 
-    public final int lineDecl;
-    public final String varType;
-    public final String varName;
+    private final int lineDecl;
+    private final String varType;
+    private final String varName;
 
     public VarDeclNode(int lineDecl, String varType, String varName) {
         this.lineDecl = lineDecl;
         this.varType = varType;
         this.varName = varName;
+    }
+
+    public String getVarType() {
+        return varType;
+    }
+
+    public String getVarName() {
+        return varName;
     }
 
     public String prettyPrint(String identation) {

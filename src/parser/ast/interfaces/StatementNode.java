@@ -1,7 +1,12 @@
 package parser.ast.interfaces;
 
+import semantics.TypesVisitor;
+import semantics.types.Type;
+
 public interface StatementNode {
 
     String prettyPrint(String string);
+
+    public Type accept(TypesVisitor vis);
 
 }

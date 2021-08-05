@@ -38,28 +38,9 @@ import parser.ast.statement.PrintStatement;
 import parser.ast.statement.SetArrayIndexStatement;
 import parser.ast.statement.SetVariableStatement;
 import parser.ast.statement.WhileStatement;
+import utils.Pair;
 
 public class MJParser {
-
-    public class Pair<K, V> {
-
-        private final K first;
-        private final V second;
-
-        public Pair(K first, V second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        public K first() {
-            return this.first;
-        }
-
-        public V second() {
-            return this.second;
-        }
-
-    }
 
     public class TokenBuffer {
 
@@ -283,7 +264,7 @@ public class MJParser {
                 return new SetArrayIndexStatement(oneAhead.getLine(), oneAhead.getText(), arrayExpr, index);
             }
         default:
-            throw new RuntimeException(String.format("Error while trying to parse \"%s\" symbol in line %d",
+            throw new AssertionError(String.format("Error while trying to parse \"%s\" symbol in line %d",
                     oneAhead.getText(), oneAhead.getLine()));
 
         }
@@ -320,7 +301,7 @@ public class MJParser {
                 handleTokenTypeCheck(MJLexer.RPARENS);
                 head = new NewObjectDeclExpr(twoAhead.getText());
             } else {
-                throw new RuntimeException(
+                throw new AssertionError(
                         String.format("Failed while trying to parse \"new ...\" in line %d", oneAhead.getLine()));
             }
             break;
@@ -333,7 +314,7 @@ public class MJParser {
             handleTokenTypeCheck(MJLexer.RPARENS);
             break;
         default:
-            throw new RuntimeException(
+            throw new AssertionError(
                     String.format("Failed while trying to parse \"factor\" in line %d. Got \"%s\" instead\"",
                             oneAhead.getLine(), oneAhead.getText()));
         }
@@ -369,7 +350,7 @@ public class MJParser {
                 handleTokenTypeCheck(MJLexer.RPARENS);
                 head = new MethodCallExpr(head, args);
             } else {
-                throw new RuntimeException(String.format(
+                throw new AssertionError(String.format(
                         "Failed while trying to parse expression of form \"A.B\" in line %d", oneAhead.getLine()));
             }
             break;

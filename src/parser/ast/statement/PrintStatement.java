@@ -5,7 +5,7 @@ import parser.ast.interfaces.StatementNode;
 
 public class PrintStatement implements StatementNode {
 
-    public final ExprNode printExpr;
+    private final ExprNode printExpr;
 
     public PrintStatement(ExprNode printExpr) {
         this.printExpr = printExpr;

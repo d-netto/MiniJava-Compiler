@@ -1,9 +1,9 @@
 package semantics.types;
 
-public class Variable {
+public class Variable extends Type {
 
-    public final Type type;
-    public boolean hasBeenSet;
+    private final Type type;
+    private boolean hasBeenSet;
 
     public Variable(Type type) {
         this.type = type;
@@ -12,6 +12,22 @@ public class Variable {
 
     @Override public int hashCode() {
         return type.hashCode() + (hasBeenSet ? 0 : 1);
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public boolean hasBeenSet() {
+        return hasBeenSet;
+    }
+
+    public void setVariable() {
+        hasBeenSet = true;
+    }
+
+    @Override public boolean isVariableType() {
+        return true;
     }
 
 }

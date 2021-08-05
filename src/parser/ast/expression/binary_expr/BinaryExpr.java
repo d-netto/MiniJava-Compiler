@@ -12,4 +12,12 @@ public abstract class BinaryExpr implements ExprNode {
         this.rightHandSide = rightHandSide;
     }
 
+    public ExprNode getLeftHandSide() {
+        return leftHandSide;
+    }
+
+    public ExprNode getRightHandSide() {
+        return rightHandSide;
+    }
+
 }

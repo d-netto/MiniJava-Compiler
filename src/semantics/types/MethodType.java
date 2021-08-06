@@ -9,12 +9,12 @@ public class MethodType extends Type {
 
     private final Type returnType;
     private final List<VariableHolder> arguments;
-    private final Map<String, Variable> varsDecl;
+    private final Map<String, Type> varsDecl;
 
-    public MethodType(Type returnType, List<VariableHolder> arguments, Map<String, Variable> variablesDeclared) {
+    public MethodType(Type returnType, List<VariableHolder> arguments, Map<String, Type> TypesDeclared) {
         this.returnType = returnType;
         this.arguments = arguments;
-        this.varsDecl = variablesDeclared;
+        this.varsDecl = TypesDeclared;
     }
 
     @Override public boolean equals(Object otherType) {
@@ -35,7 +35,7 @@ public class MethodType extends Type {
         return arguments;
     }
 
-    public Map<String, Variable> getVarsDecl() {
+    public Map<String, Type> getVarsDecl() {
         return varsDecl;
     }
 

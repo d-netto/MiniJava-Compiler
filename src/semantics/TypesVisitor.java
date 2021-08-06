@@ -34,7 +34,6 @@ import parser.ast.statement.WhileStatement;
 import semantics.types.ClassType;
 import semantics.types.MethodType;
 import semantics.types.Type;
-import semantics.types.Variable;
 import semantics.types.base_types.BooleanType;
 import semantics.types.base_types.IntArrayType;
 import semantics.types.base_types.IntType;
@@ -52,14 +51,14 @@ public class TypesVisitor {
         this.builderVis = builderVis;
     }
 
-    private Variable getVar(String name, int line) {
+    private Type getVar(String name, int line) {
         if (currentMethod != null) {
             if (currentMethod.getVarsDecl().containsKey(name)) {
                 return currentMethod.getVarsDecl().get(name);
             } else {
                 for (VariableHolder varHolder : currentMethod.getArguments()) {
                     if (varHolder.getVarName().equals(name)) {
-                        return varHolder.getVariable();
+                        return varHolder.getType();
                     }
                 }
             }
@@ -71,11 +70,11 @@ public class TypesVisitor {
                 }
             }
         }
-        throw new AssertionError(String.format("Variable \"%s\" used in line %d was not defined", name, line));
+        throw new AssertionError(String.format("Type \"%s\" used in line %d was not defined", name, line));
     }
 
     public Type visit(IdentifierExpr expr) {
-        return getVar(expr.getIdentifierName(), expr.getLine()).getType();
+        return getVar(expr.getIdentifierName(), expr.getLine());
     }
 
     public Type visit(IntExpr expr) {
@@ -97,8 +96,6 @@ public class TypesVisitor {
     public Type visit(AddExpr expr) {
         Type leftHandSide = expr.getLeftHandSide().accept(this);
         Type rightHandSide = expr.getRightHandSide().accept(this);
-        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
-                .format("Variable(s) in line %d has/have not been set", expr.getLine());
         assert leftHandSide.isIntType() && rightHandSide.isIntType() : String.format("Type mismatch in line %d",
                 expr.getLine());
         return new IntType();
@@ -107,8 +104,6 @@ public class TypesVisitor {
     public Type visit(AndExpr expr) {
         Type leftHandSide = expr.getLeftHandSide().accept(this);
         Type rightHandSide = expr.getRightHandSide().accept(this);
-        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
-                .format("Variable(s) in line %d has/have not been set", expr.getLine());
         assert leftHandSide.isBooleanType() && rightHandSide.isBooleanType() : String.format("Type mismatch in line %d",
                 expr.getLine());
         return new BooleanType();
@@ -118,20 +113,8 @@ public class TypesVisitor {
         ExprNode leftHandSide = expr.getLeftHandSide();
         IdentifierExpr rightHandSide = (IdentifierExpr) expr.getRightHandSide();
         String rightHandSideName = rightHandSide.getIdentifierName();
-        if (leftHandSide instanceof ThisExpr) {
-            return currentClass.getMethods().get(rightHandSideName);
-        } else if (leftHandSide instanceof IdentifierExpr) {
-            String varName = ((IdentifierExpr) leftHandSide).getIdentifierName();
-            Variable variable = getVar(varName, expr.getLine());
-            assert variable.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
-                    expr.getLine());
-            return ((ClassType) variable.getType()).getMethods().get(rightHandSideName);
-        } else if (leftHandSide instanceof NewObjectDeclExpr) {
-            String className = ((NewObjectDeclExpr) leftHandSide).getObjectName();
-            return builderVis.getClassType(className, expr.getLine()).getMethods().get(rightHandSideName);
-        }
         Type leftHandSideType = leftHandSide.accept(this);
-        assert leftHandSideType instanceof ClassType : "Internal error in DotExpr";
+        assert leftHandSideType.isClassType() : "Internal error in DotExpr";
         ClassType classType = (ClassType) leftHandSideType;
         assert classType.getMethods().containsKey(rightHandSideName) : String
                 .format("Method \"%s\" from line %d not defined in its class", rightHandSideName, expr.getLine());
@@ -141,8 +124,6 @@ public class TypesVisitor {
     public Type visit(LtExpr expr) {
         Type leftHandSide = expr.getLeftHandSide().accept(this);
         Type rightHandSide = expr.getRightHandSide().accept(this);
-        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
-                .format("Variable(s) in line %d has/have not been set", expr.getLine());
         assert leftHandSide.isIntType() && rightHandSide.isIntType() : String.format("Type mismatch in line %d",
                 expr.getLine());
         return new BooleanType();
@@ -151,8 +132,6 @@ public class TypesVisitor {
     public Type visit(MultExpr expr) {
         Type leftHandSide = expr.getLeftHandSide().accept(this);
         Type rightHandSide = expr.getRightHandSide().accept(this);
-        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
-                .format("Variable(s) in line %d has/have not been set", expr.getLine());
         assert leftHandSide.isIntType() && rightHandSide.isIntType() : String.format("Type mismatch in line %d",
                 expr.getLine());
         return new IntType();
@@ -161,28 +140,22 @@ public class TypesVisitor {
     public Type visit(SubExpr expr) {
         Type leftHandSide = expr.getLeftHandSide().accept(this);
         Type rightHandSide = expr.getRightHandSide().accept(this);
-        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
-                .format("Variable(s) in line %d has/have not been set", expr.getLine());
         assert leftHandSide.isIntType() && rightHandSide.isIntType() : String.format("Type mismatch in line %d",
                 expr.getLine());
         return new IntType();
     }
 
     public Type visit(ArrayAccessExpr expr) {
-        Type arrayVariable = expr.getArray().accept(this);
+        Type arrayType = expr.getArray().accept(this);
         Type index = expr.getIndex().accept(this);
-        assert arrayVariable.hasBeenSet() && index.hasBeenSet() : String
-                .format("Variable(s) in line %d has/have not been set", expr.getLine());
-        assert arrayVariable.isIntArrayType() && index.isIntType() : String
+        assert arrayType.isIntArrayType() && index.isIntType() : String
                 .format("Expression in line %d does not define an array", expr.getLine());
         return new IntType();
     }
 
     public Type visit(LengthExpr expr) {
-        Type arrayVariable = expr.getLenExpr().accept(this);
-        assert arrayVariable.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
-                expr.getLine());
-        assert arrayVariable.isIntArrayType() : String.format("Expression in line %d does not define an array",
+        Type arrayType = expr.getLenExpr().accept(this);
+        assert arrayType.isIntArrayType() : String.format("Expression in line %d does not define an array",
                 expr.getLine());
         return new IntType();
     }
@@ -194,7 +167,7 @@ public class TypesVisitor {
         Iterator<VariableHolder> argListIter = ((MethodType) method).getArguments().iterator();
         while (argListForExprIter.hasNext()) {
             Type argCallType = argListForExprIter.next().accept(this);
-            Type argSigType = argListIter.next().getVariable().getType();
+            Type argSigType = argListIter.next().getType();
             if (argSigType.isClassType()) {
                 assert argCallType.isClassType() : String
                         .format("Argument type in function call in line %d should be a class", expr.getLine());
@@ -220,7 +193,6 @@ public class TypesVisitor {
 
     public Type visit(NotExpr expr) {
         Type argument = expr.getArgument().accept(this);
-        assert argument.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set", expr.getLine());
         assert argument.isBooleanType() : String.format("Type mismatch in line %d", expr.getLine());
         return new BooleanType();
     }
@@ -233,8 +205,6 @@ public class TypesVisitor {
 
     public void visit(IfStatement statement) {
         Type ifCondition = statement.getIfCondition().accept(this);
-        assert ifCondition.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
-                statement.getLine());
         assert ifCondition.isBooleanType() : String.format("Type mismatch in line %d", statement.getLine());
         statement.getIfBlock().accept(this);
         statement.getElseBlock().accept(this);
@@ -242,15 +212,12 @@ public class TypesVisitor {
 
     public void visit(PrintStatement statement) {
         Type printExpr = statement.getPrintExpr().accept(this);
-        assert printExpr.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
-                statement.getLine());
         assert printExpr.isIntType() : String.format("Type mismatch in line %d", statement.getLine());
     }
 
     public void visit(SetArrayIndexStatement statement) {
-        Variable variable = getVar(statement.getVarAssignedName(), statement.getLine());
-        variable.setVariable();
-        assert variable.getType().isIntArrayType() : String.format("Type mismatch in line %d", statement.getLine());
+        Type arrayVariable = getVar(statement.getVarAssignedName(), statement.getLine());
+        assert arrayVariable.isIntArrayType() : String.format("Type mismatch in line %d", statement.getLine());
         assert statement.getIndex().accept(this).isIntType() : String.format("Type mismatch in line %d",
                 statement.getLine());
         assert statement.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
@@ -258,25 +225,20 @@ public class TypesVisitor {
     }
 
     public void visit(SetVariableStatement statement) {
-        Variable variable = getVar(statement.getVarAssignedName(), statement.getLine());
-        variable.setVariable();
-        Type variableType = variable.getType();
+        Type variable = getVar(statement.getVarAssignedName(), statement.getLine());
         Type rightHandSideType = statement.getRightHandSide().accept(this);
-        if (variableType.isClassType()) {
+        if (variable.isClassType()) {
             assert rightHandSideType.isClassType() : String
                     .format("Right hand side in line %d should be a memeber of a class", statement.getLine());
-            assert ((ClassType) rightHandSideType).containsClassAsParent(((ClassType) variableType)) : String
+            assert ((ClassType) rightHandSideType).containsClassAsParent(((ClassType) variable)) : String
                     .format("Type mismatch in line %d", statement.getLine());
         } else {
-            assert variableType.equals(rightHandSideType) : String.format("Type mismatch in line %d",
-                    statement.getLine());
+            assert variable.equals(rightHandSideType) : String.format("Type mismatch in line %d", statement.getLine());
         }
     }
 
     public void visit(WhileStatement statement) {
         Type whileCondition = statement.getWhileCondition().accept(this);
-        assert whileCondition.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
-                statement.getLine());
         assert whileCondition.isBooleanType() : String.format("Type mismatch in line %d", statement.getLine());
         statement.getWhileBlock().accept(this);
     }

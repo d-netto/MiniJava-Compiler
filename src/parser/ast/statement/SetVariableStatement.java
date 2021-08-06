@@ -28,7 +28,7 @@ public class SetVariableStatement extends StatementNode {
                 + rightHandSide.prettyString(identation + "\t");
     }
 
-    public void accept(TypesVisitor vis) {
+    @Override public void accept(TypesVisitor vis) {
         vis.visit(this);
     }
 

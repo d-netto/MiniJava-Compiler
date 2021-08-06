@@ -2,10 +2,6 @@ package semantics.types;
 
 public abstract class Type {
 
-    public boolean hasBeenSet() {
-        return true;
-    }
-
     public boolean isBooleanType() {
         return false;
     }
@@ -26,7 +22,7 @@ public abstract class Type {
         return false;
     }
 
-    public boolean isVariableType() {
+    public boolean isTypeType() {
         return false;
     }
 

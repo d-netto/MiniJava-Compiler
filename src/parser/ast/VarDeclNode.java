@@ -4,7 +4,7 @@ import java.util.Map;
 
 import semantics.BuilderVisitor;
 import semantics.TypesVisitor;
-import semantics.types.Variable;
+import semantics.types.Type;
 
 public class VarDeclNode {
 
@@ -34,7 +34,7 @@ public class VarDeclNode {
         return identation + "VarDeclNode: " + "\n" + identation + "\t" + varType + "\n" + identation + "\t" + varName;
     }
 
-    public void accept(BuilderVisitor vis, Map<String, Variable> fields) {
+    public void accept(BuilderVisitor vis, Map<String, Type> fields) {
         vis.visit(this, fields);
     }
 

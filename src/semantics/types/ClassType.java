@@ -8,10 +8,10 @@ import java.util.Optional;
 public class ClassType extends Type {
 
     private Optional<ClassType> extendsFrom;
-    private Map<String, Variable> fields;
+    private Map<String, Type> fields;
     private Map<String, MethodType> methods;
 
-    public ClassType(Optional<ClassType> extendsFrom, Map<String, Variable> fields, Map<String, MethodType> methods) {
+    public ClassType(Optional<ClassType> extendsFrom, Map<String, Type> fields, Map<String, MethodType> methods) {
         this.extendsFrom = extendsFrom;
         this.fields = fields;
         this.methods = methods;
@@ -21,7 +21,7 @@ public class ClassType extends Type {
         return extendsFrom;
     }
 
-    public Map<String, Variable> getFields() {
+    public Map<String, Type> getFields() {
         return fields;
     }
 
@@ -48,7 +48,7 @@ public class ClassType extends Type {
         extendsFrom = otherExtendsFrom;
     }
 
-    public void setFields(Map<String, Variable> otherFields) {
+    public void setFields(Map<String, Type> otherFields) {
         fields = otherFields;
     }
 

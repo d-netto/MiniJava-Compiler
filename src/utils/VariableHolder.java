@@ -1,24 +1,24 @@
 package utils;
 
-import semantics.types.Variable;
+import semantics.types.Type;
 
 public class VariableHolder {
 
     private String varName;
 
-    private Variable variable;
+    private Type type;
 
-    public VariableHolder(String varName, Variable variable) {
+    public VariableHolder(String varName, Type type) {
         this.varName = varName;
-        this.variable = variable;
+        this.type = type;
     }
 
     public String getVarName() {
         return varName;
     }
 
-    public Variable getVariable() {
-        return variable;
+    public Type getType() {
+        return type;
     }
 
 }

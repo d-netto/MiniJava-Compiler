@@ -16,7 +16,6 @@ import parser.ast.VarDeclNode;
 import semantics.types.ClassType;
 import semantics.types.MethodType;
 import semantics.types.Type;
-import semantics.types.Variable;
 import semantics.types.base_types.BooleanType;
 import semantics.types.base_types.IntArrayType;
 import semantics.types.base_types.IntType;
@@ -96,7 +95,7 @@ public class BuilderVisitor {
             allParents = getClassType(node.getExtendsFrom().get(), node.getLine()).getAllParents();
             extendsFrom = Optional.of(getClassType(node.getExtendsFrom().get(), node.getLine()));
         }
-        Map<String, Variable> fields = new HashMap<>();
+        Map<String, Type> fields = new HashMap<>();
         Map<String, MethodType> methods = new HashMap<>();
         ClassType thisClass = new ClassType(extendsFrom, fields, methods);
         addClassType(node.getClassName(), thisClass);
@@ -114,8 +113,8 @@ public class BuilderVisitor {
                             .iterator();
                     Iterator<VariableHolder> argumentsMethodFromParentIter = methodFromParent.getArguments().iterator();
                     while (argumentsCurrentMethodIter.hasNext()) {
-                        assert argumentsCurrentMethodIter.next().getVariable().getType()
-                                .equals(argumentsMethodFromParentIter.next().getVariable().getType()) : String.format(
+                        assert argumentsCurrentMethodIter.next().getType()
+                                .equals(argumentsMethodFromParentIter.next().getType()) : String.format(
                                         "Overwritten method in %d should be called with the same parameter types as the method in parent class",
                                         node.getLine());
                     }
@@ -126,9 +125,8 @@ public class BuilderVisitor {
         }
     }
 
-    public void visit(VarDeclNode node, Map<String, Variable> fields) {
-        Type varType = getType(node.getVarType(), node.getLine());
-        fields.put(node.getVarName(), new Variable(varType));
+    public void visit(VarDeclNode node, Map<String, Type> fields) {
+        fields.put(node.getVarName(), getType(node.getVarType(), node.getLine()));
     }
 
     public void visit(MethodDeclNode node, Map<String, MethodType> methods) {
@@ -137,15 +135,13 @@ public class BuilderVisitor {
         List<VariableHolder> arguments = new ArrayList<>();
         for (Pair<String, String> argument : node.getMethodArgs()) {
             varNamesSeenSoFar.add(argument.second());
-            Variable variable = new Variable(getType(argument.first(), node.getLine()));
-            variable.setVariable();
-            arguments.add(new VariableHolder(argument.second(), variable));
+            arguments.add(new VariableHolder(argument.second(), getType(argument.first(), node.getLine())));
         }
-        Map<String, Variable> varsDecls = new HashMap<>();
+        Map<String, Type> varsDecls = new HashMap<>();
         for (VarDeclNode varDecl : node.getVarDecls()) {
             String varName = varDecl.getVarName();
             if (varNamesSeenSoFar.contains(varName) || varsDecls.containsKey(varName)) {
-                throw new AssertionError(String.format("Variable  \"%s\" has already been declared", varName));
+                throw new AssertionError(String.format("Type  \"%s\" has already been declared", varName));
             }
             varDecl.accept(this, varsDecls);
         }

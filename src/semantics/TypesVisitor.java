@@ -268,8 +268,8 @@ public class TypesVisitor {
             assert ((ClassType) rightHandSideType).containsClassAsParent(((ClassType) variableType)) : String
                     .format("Type mismatch in line %d", statement.getLine());
         } else {
-            assert variable.getType().equals(statement.getRightHandSide().accept(this)) : String
-                    .format("Type mismatch in line %d", statement.getLine());
+            assert variableType.equals(rightHandSideType) : String.format("Type mismatch in line %d",
+                    statement.getLine());
         }
     }
 

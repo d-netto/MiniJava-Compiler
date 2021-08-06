@@ -4,12 +4,13 @@ import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
 import semantics.TypesVisitor;
 
-public class WhileStatement implements StatementNode {
+public class WhileStatement extends StatementNode {
 
     private ExprNode whileCondition;
     private StatementNode whileBlock;
 
-    public WhileStatement(ExprNode whileCondition, StatementNode whileBlock) {
+    public WhileStatement(int line, ExprNode whileCondition, StatementNode whileBlock) {
+        super(line);
         this.whileCondition = whileCondition;
         this.whileBlock = whileBlock;
     }
@@ -22,7 +23,7 @@ public class WhileStatement implements StatementNode {
         return whileBlock;
     }
 
-    public String prettyPrint(String identation) {
+    @Override public String prettyPrint(String identation) {
         return identation + "WhileStatement:" + "\n" + whileCondition.prettyPrint(identation + "\t") + "\n"
                 + whileBlock.prettyPrint(identation + "\t");
     }

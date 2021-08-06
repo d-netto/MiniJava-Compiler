@@ -4,11 +4,12 @@ import parser.ast.interfaces.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
-public class IdentifierExpr implements ExprNode {
+public class IdentifierExpr extends ExprNode {
 
     private final String identifierName;
 
-    public IdentifierExpr(String identifierName) {
+    public IdentifierExpr(int line, String identifierName) {
+        super(line);
         this.identifierName = identifierName;
     }
 
@@ -16,11 +17,11 @@ public class IdentifierExpr implements ExprNode {
         return identifierName;
     }
 
-    public String prettyPrint(String identation) {
+    @Override public String prettyPrint(String identation) {
         return identation + "IdentifierExpr: " + identifierName;
     }
 
-    public Type accept(TypesVisitor vis) {
+    @Override public Type accept(TypesVisitor vis) {
         return vis.visit(this);
     }
 

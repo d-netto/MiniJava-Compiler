@@ -52,7 +52,7 @@ public class TypesVisitor {
         this.builderVis = builderVis;
     }
 
-    private Variable getVar(String name) {
+    private Variable getVar(String name, int line) {
         if (currentMethod != null) {
             if (currentMethod.getVarsDecl().containsKey(name)) {
                 return currentMethod.getVarsDecl().get(name);
@@ -71,7 +71,7 @@ public class TypesVisitor {
     }
 
     public Type visit(IdentifierExpr expr) {
-        return getVar(expr.getIdentifierName()).getType();
+        return getVar(expr.getIdentifierName(), expr.getLine()).getType();
     }
 
     public Type visit(IntExpr expr) {
@@ -92,7 +92,8 @@ public class TypesVisitor {
 
     public Type visit(AddExpr expr) {
         assert expr.getLeftHandSide().accept(this).isIntType()
-                && expr.getRightHandSide().accept(this).isIntType() : "Type mismatch";
+                && expr.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
+                        expr.getLine());
         return new IntType();
     }
 
@@ -110,44 +111,53 @@ public class TypesVisitor {
             return currentClass.getMethods().get(rightHandSideName);
         } else if (leftHandSide instanceof IdentifierExpr) {
             String varName = ((IdentifierExpr) leftHandSide).getIdentifierName();
-            return ((ClassType) getVar(varName).getType()).getMethods().get(rightHandSideName);
+            return ((ClassType) getVar(varName, expr.getLine()).getType()).getMethods().get(rightHandSideName);
         } else if (leftHandSide instanceof NewObjectDeclExpr) {
             String className = ((NewObjectDeclExpr) leftHandSide).getObjectName();
-            return builderVis.getClassType(className).getMethods().get(rightHandSideName);
+            return builderVis.getClassType(className, expr.getLine()).getMethods().get(rightHandSideName);
         }
         Type leftHandSideType = leftHandSide.accept(this);
         assert leftHandSideType instanceof ClassType : "Internal error in DotExpr";
         ClassType classType = (ClassType) leftHandSideType;
-        assert classType.getFields().containsKey(rightHandSideName) : String
-                .format("Field \"%s\" has not been defined in class", rightHandSideName);
+        assert classType.getFields().containsKey(rightHandSideName) : String.format(
+                "Field \"%s\" mentioned in line %d has not been defined in class", rightHandSideName, expr.getLine());
         return classType.getMethods().get(rightHandSideName);
     }
 
     public Type visit(LtExpr expr) {
         assert expr.getLeftHandSide().accept(this).isIntType()
-                && expr.getRightHandSide().accept(this).isIntType() : "Type mismatch";
+                && expr.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
+                        expr.getLine());
+        ;
         return new BooleanType();
     }
 
     public Type visit(MultExpr expr) {
         assert expr.getLeftHandSide().accept(this).isIntType()
-                && expr.getRightHandSide().accept(this).isIntType() : "Type mismatch";
+                && expr.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
+                        expr.getLine());
+        ;
         return new IntType();
     }
 
     public Type visit(SubExpr expr) {
         assert expr.getLeftHandSide().accept(this).isIntType()
-                && expr.getRightHandSide().accept(this).isIntType() : "Type mismatch";
+                && expr.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
+                        expr.getLine());
+        ;
         return new IntType();
     }
 
     public Type visit(ArrayAccessExpr expr) {
-        assert expr.getArray().accept(this).isIntArrayType() : "Expression does not define an array";
+        assert expr.getArray().accept(this).isIntArrayType() : String
+                .format("Expression in line %d does not define an array", expr.getLine());
         return new IntType();
     }
 
     public Type visit(LengthExpr expr) {
-        assert expr.getLenExpr().accept(this).isIntArrayType() : "Expression does not define an array";
+        assert expr.getLenExpr().accept(this).isIntArrayType() : String
+                .format("Expression in line %d does not define an array", expr.getLine());
+        ;
         return new IntType();
     }
 
@@ -156,7 +166,8 @@ public class TypesVisitor {
         assert method.isMethodType() : "Internal error in DotExpr";
         List<ExprNode> argListForExpr = expr.getArgs();
         List<Pair<String, Variable>> args = ((MethodType) method).getArguments();
-        assert argListForExpr.size() == args.size() : "Number of arguments mismatch";
+        assert argListForExpr.size() == args.size() : String
+                .format("Number of arguments mismatch in method call in line", expr.getLine());
         for (int i = 0; i < argListForExpr.size(); i++) {
             Type argType = argListForExpr.get(i).accept(this);
             assert argType.equals(args.get(i).second().getType()) : String.format("Type mismatch in argument call %s",
@@ -170,11 +181,12 @@ public class TypesVisitor {
     }
 
     public Type visit(NewObjectDeclExpr expr) {
-        return builderVis.getClassType(expr.getObjectName());
+        return builderVis.getClassType(expr.getObjectName(), expr.getLine());
     }
 
     public Type visit(NotExpr expr) {
-        assert expr.getArgument().accept(this).isBooleanType() : "Type mismatch";
+        assert expr.getArgument().accept(this).isBooleanType() : String.format("Type mismatch in line %d",
+                expr.getLine());
         return new BooleanType();
     }
 
@@ -185,28 +197,36 @@ public class TypesVisitor {
     }
 
     public void visit(IfStatement statement) {
-        assert statement.getIfCondition().accept(this).isBooleanType() : "Type mismatch";
+        assert statement.getIfCondition().accept(this).isBooleanType() : String.format("Type mismatch in line %d",
+                statement.getLine());
         statement.getIfBlock().accept(this);
         statement.getElseBlock().accept(this);
     }
 
     public void visit(PrintStatement statement) {
-        assert statement.getPrintExpr().accept(this).isIntType() : "Type mismatch";
+        assert statement.getPrintExpr().accept(this).isIntType() : String.format("Type mismatch in line %d",
+                statement.getLine());
     }
 
     public void visit(SetArrayIndexStatement statement) {
-        assert getVar(statement.getVarAssignedName()).getType().isIntArrayType() : "Type mismatch";
-        assert statement.getIndex().accept(this).isIntType() : "Type mismatch";
-        assert statement.getRightHandSide().accept(this).isIntType() : "Type mismatch";
+        assert getVar(statement.getVarAssignedName(), statement.getLine()).getType().isIntArrayType() : "Type mismatch";
+        assert statement.getIndex().accept(this).isIntType() : String.format("Type mismatch in line %d",
+                statement.getLine());
+        assert statement.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
+                statement.getLine());
     }
 
     public void visit(SetVariableStatement statement) {
-        assert getVar(statement.getVarAssignedName()).getType()
-                .equals(statement.getRightHandSide().accept(this)) : "Type mismatch";
+        assert getVar(statement.getVarAssignedName(), statement.getLine()).getType()
+                .equals(statement.getRightHandSide().accept(this)) : String.format("Type mismatch in line %d",
+                        statement.getLine());
+        ;
     }
 
     public void visit(WhileStatement statement) {
-        assert statement.getWhileCondition().accept(this).isBooleanType() : "Type mismatch";
+        assert statement.getWhileCondition().accept(this).isBooleanType() : String.format("Type mismatch in line %d",
+                statement.getLine());
+        ;
         statement.getWhileBlock().accept(this);
     }
 
@@ -222,7 +242,7 @@ public class TypesVisitor {
     public void visit(GoalNode node) {
         node.getStatement().accept(this);
         for (ClassNode classNode : node.getClasses()) {
-            currentClass = builderVis.getClassType(classNode.getClassName());
+            currentClass = builderVis.getClassType(classNode.getClassName(), node.getLine());
             classNode.accept(this);
         }
     }
@@ -235,7 +255,8 @@ public class TypesVisitor {
         for (StatementNode statement : node.getStatements()) {
             statement.accept(this);
         }
-        assert builderVis.getType(node.getMethodType()).equals(node.getReturnExpr().accept(this)) : "Type mismatch";
+        assert builderVis.getType(node.getMethodType(), node.getLine())
+                .equals(node.getReturnExpr().accept(this)) : "Type mismatch";
     }
 
     public void visit(VarDeclNode node) {

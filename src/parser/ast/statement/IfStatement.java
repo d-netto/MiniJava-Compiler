@@ -4,13 +4,14 @@ import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
 import semantics.TypesVisitor;
 
-public class IfStatement implements StatementNode {
+public class IfStatement extends StatementNode {
 
     private final ExprNode ifCondition;
     private final StatementNode ifBlock;
     private final StatementNode elseBlock;
 
-    public IfStatement(ExprNode ifCondition, StatementNode ifBlock, StatementNode elseBlock) {
+    public IfStatement(int line, ExprNode ifCondition, StatementNode ifBlock, StatementNode elseBlock) {
+        super(line);
         this.ifCondition = ifCondition;
         this.ifBlock = ifBlock;
         this.elseBlock = elseBlock;
@@ -28,7 +29,7 @@ public class IfStatement implements StatementNode {
         return elseBlock;
     }
 
-    public String prettyPrint(String identation) {
+    @Override public String prettyPrint(String identation) {
         return identation + "IfStatement:" + "\n" + ifCondition.prettyPrint(identation + "\t") + "\n"
                 + ifBlock.prettyPrint(identation + "\t") + "\n" + elseBlock.prettyPrint(identation + "\t");
     }

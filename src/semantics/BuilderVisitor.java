@@ -33,14 +33,14 @@ public class BuilderVisitor {
         return new HashMap<>(classSymbolTable);
     }
 
-    public ClassType getClassType(String className) {
+    public ClassType getClassType(String className, int line) {
         if (classSymbolTable.containsKey(className)) {
             return classSymbolTable.get(className);
         }
-        throw new AssertionError("Semantic error: Class " + className + " was not declared");
+        throw new AssertionError(String.format("Semantic error: class %s was not declared in line", className, line));
     }
 
-    public Type getType(String className) {
+    public Type getType(String className, int line) {
         if (className.equals("boolean")) {
             return new BooleanType();
         } else if (className.equals("int")) {
@@ -48,7 +48,7 @@ public class BuilderVisitor {
         } else if (className.equals("int[]")) {
             return new IntArrayType();
         } else {
-            return getClassType(className);
+            return getClassType(className, line);
         }
     }
 
@@ -68,7 +68,7 @@ public class BuilderVisitor {
     public void visit(ClassNode node) {
         Optional<ClassType> extendsFrom = Optional.empty();
         if (node.getExtendsFrom().isPresent()) {
-            extendsFrom = Optional.of(getClassType(node.getExtendsFrom().get()));
+            extendsFrom = Optional.of(getClassType(node.getExtendsFrom().get(), node.getLine()));
         }
         Map<String, Variable> fields = new HashMap<>();
         Map<String, MethodType> methods = new HashMap<>();
@@ -83,17 +83,18 @@ public class BuilderVisitor {
     }
 
     public void visit(VarDeclNode node, Map<String, Variable> fields) {
-        Type varType = getType(node.getVarType());
+        Type varType = getType(node.getVarType(), node.getLine());
         fields.put(node.getVarName(), new Variable(varType));
     }
 
     public void visit(MethodDeclNode node, Map<String, MethodType> methods) {
-        Type returnType = getType(node.getMethodType());
+        Type returnType = getType(node.getMethodType(), node.getLine());
         Set<String> varNames = new HashSet<>();
         List<Pair<String, Variable>> arguments = new ArrayList<>();
         for (Pair<String, String> argument : node.getMethodArgs()) {
             varNames.add(argument.second());
-            arguments.add(new Pair<String, Variable>(argument.second(), new Variable(getType(argument.first()))));
+            arguments.add(new Pair<String, Variable>(argument.second(),
+                    new Variable(getType(argument.first(), node.getLine()))));
         }
         Map<String, Variable> varsDecls = new HashMap<>();
         for (VarDeclNode varDecl : node.getVarDecls()) {

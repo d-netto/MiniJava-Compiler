@@ -4,15 +4,14 @@ import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
 import semantics.TypesVisitor;
 
-public class SetArrayIndexStatement implements StatementNode {
+public class SetArrayIndexStatement extends StatementNode {
 
-    private final int lineAssignment;
     private final String varAssignedName;
     private final ExprNode index;
     private final ExprNode rightHandSide;
 
-    public SetArrayIndexStatement(int lineAssignment, String varAssignedName, ExprNode index, ExprNode rightHandSide) {
-        this.lineAssignment = lineAssignment;
+    public SetArrayIndexStatement(int line, String varAssignedName, ExprNode index, ExprNode rightHandSide) {
+        super(line);
         this.varAssignedName = varAssignedName;
         this.index = index;
         this.rightHandSide = rightHandSide;
@@ -30,7 +29,7 @@ public class SetArrayIndexStatement implements StatementNode {
         return rightHandSide;
     }
 
-    public String prettyPrint(String identation) {
+    @Override public String prettyPrint(String identation) {
         return identation + "SetArrayIndexStatement:" + "\n" + identation + "\t" + varAssignedName + "\n"
                 + index.prettyPrint(identation + "\t") + "\n" + rightHandSide.prettyPrint(identation + "\t");
     }

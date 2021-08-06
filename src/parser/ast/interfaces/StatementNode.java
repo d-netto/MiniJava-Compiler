@@ -2,10 +2,20 @@ package parser.ast.interfaces;
 
 import semantics.TypesVisitor;
 
-public interface StatementNode {
+public abstract class StatementNode {
 
-    String prettyPrint(String string);
+    private int line;
 
-    public void accept(TypesVisitor vis);
+    public StatementNode(int line) {
+        this.line = line;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public abstract String prettyPrint(String string);
+
+    public abstract void accept(TypesVisitor vis);
 
 }

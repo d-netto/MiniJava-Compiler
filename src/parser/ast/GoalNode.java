@@ -9,16 +9,22 @@ import semantics.TypesVisitor;
 
 public class GoalNode {
 
+    private final int line;
     private final String mainClassName;
     private final String argName;
     private final StatementNode statement;
     private final List<ClassNode> classes;
 
-    public GoalNode(String mainClassName, String argName, StatementNode statement, List<ClassNode> classes) {
+    public GoalNode(int line, String mainClassName, String argName, StatementNode statement, List<ClassNode> classes) {
+        this.line = line;
         this.mainClassName = mainClassName;
         this.argName = argName;
         this.statement = statement;
         this.classes = classes;
+    }
+
+    public int getLine() {
+        return line;
     }
 
     public StatementNode getStatement() {
@@ -30,13 +36,13 @@ public class GoalNode {
     }
 
     public String prettyPrint(String identation) {
-        String str = "GoalNode:" + "\n" + identation + "\t" + mainClassName;
-        str += "\n" + identation + "\t" + argName;
-        str += "\n" + statement.prettyPrint(identation + "\t");
+        StringBuilder strBuilder = new StringBuilder("GoalNode:" + "\n" + identation + "\t" + mainClassName);
+        strBuilder.append("\n" + identation + "\t" + argName);
+        strBuilder.append("\n" + statement.prettyPrint(identation + "\t"));
         for (ClassNode _class : classes) {
-            str += "\n" + _class.prettyPrint(identation + "\t");
+            strBuilder.append("\n" + _class.prettyPrint(identation + "\t"));
         }
-        return identation + str;
+        return identation + strBuilder.toString();
     }
 
     public void accept(BuilderVisitor vis) {

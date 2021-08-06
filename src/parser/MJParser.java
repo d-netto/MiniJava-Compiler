@@ -146,7 +146,7 @@ public class MJParser {
         assert shouldBeEOF.getType() == MJLexer.EOF : String.format(
                 "Expected end of file but got token \"%s\" with text \"%s\"", shouldBeEOF.getText(),
                 ruleNames[shouldBeEOF.getType() - 1]);
-        return new GoalNode(mainClassName.getText(), argName, statement, classes);
+        return new GoalNode(mainClassName.getLine(), mainClassName.getText(), argName, statement, classes);
     }
 
     public ClassNode parseClass() {
@@ -166,7 +166,7 @@ public class MJParser {
             methodDecls.add(parseMethodDecl());
         }
         handleTokenTypeCheck(MJLexer.CURLY_RBRACKET);
-        return new ClassNode(className.getText(), extendsFrom, varDecls, methodDecls);
+        return new ClassNode(className.getLine(), className.getText(), extendsFrom, varDecls, methodDecls);
     }
 
     public VarDeclNode parseVarDecl() {
@@ -215,8 +215,8 @@ public class MJParser {
         ExprNode returnExpr = parseExpr();
         handleTokenTypeCheck(MJLexer.SEMI_COLON);
         handleTokenTypeCheck(MJLexer.CURLY_RBRACKET);
-        return new MethodDeclNode(methodType.getText(), methodName.getText(), methodArgs, varDecls, statements,
-                returnExpr);
+        return new MethodDeclNode(methodType.getLine(), methodType.getText(), methodName.getText(), methodArgs,
+                varDecls, statements, returnExpr);
     }
 
     public StatementNode parseStatement() {
@@ -228,7 +228,7 @@ public class MJParser {
                 statements.add(parseStatement());
             }
             handleTokenTypeCheck(MJLexer.CURLY_RBRACKET);
-            return new BlockStatement(statements);
+            return new BlockStatement(oneAhead.getLine(), statements);
         case MJLexer.IF:
             handleTokenTypeCheck(MJLexer.LPARENS);
             ExprNode ifCondition = parseExpr();
@@ -236,19 +236,19 @@ public class MJParser {
             StatementNode ifBlock = parseStatement();
             handleTokenTypeCheck(MJLexer.ELSE);
             StatementNode elseBlock = parseStatement();
-            return new IfStatement(ifCondition, ifBlock, elseBlock);
+            return new IfStatement(oneAhead.getLine(), ifCondition, ifBlock, elseBlock);
         case MJLexer.WHILE:
             handleTokenTypeCheck(MJLexer.LPARENS);
             ExprNode whileCondition = parseExpr();
             handleTokenTypeCheck(MJLexer.RPARENS);
             StatementNode whileBlock = parseStatement();
-            return new WhileStatement(whileCondition, whileBlock);
+            return new WhileStatement(oneAhead.getLine(), whileCondition, whileBlock);
         case MJLexer.PRINTLN:
             handleTokenTypeCheck(MJLexer.LPARENS);
             ExprNode printExpr = parseExpr();
             handleTokenTypeCheck(MJLexer.RPARENS);
             handleTokenTypeCheck(MJLexer.SEMI_COLON);
-            return new PrintStatement(printExpr);
+            return new PrintStatement(oneAhead.getLine(), printExpr);
         case MJLexer.ID:
             Token twoAhead = nextToken();
             if (twoAhead.getType() == MJLexer.EQUALS) {
@@ -275,19 +275,19 @@ public class MJParser {
         ExprNode head = null;
         switch (oneAhead.getType()) {
         case MJLexer.INT_LITERAL:
-            head = new IntExpr(oneAhead.getText());
+            head = new IntExpr(oneAhead.getLine(), oneAhead.getText());
             break;
         case MJLexer.TRUE:
-            head = new TrueExpr();
+            head = new TrueExpr(oneAhead.getLine());
             break;
         case MJLexer.FALSE:
-            head = new FalseExpr();
+            head = new FalseExpr(oneAhead.getLine());
             break;
         case MJLexer.ID:
-            head = new IdentifierExpr(oneAhead.getText());
+            head = new IdentifierExpr(oneAhead.getLine(), oneAhead.getText());
             break;
         case MJLexer.THIS:
-            head = new ThisExpr();
+            head = new ThisExpr(oneAhead.getLine());
             break;
         case MJLexer.NEW:
             Token twoAhead = nextToken();
@@ -295,11 +295,11 @@ public class MJParser {
                 handleTokenTypeCheck(MJLexer.LBRACKET);
                 ExprNode size = parseExpr();
                 handleTokenTypeCheck(MJLexer.RBRACKET);
-                head = new NewArrayDeclExpr(size);
+                head = new NewArrayDeclExpr(oneAhead.getLine(), size);
             } else if (twoAhead.getType() == MJLexer.ID) {
                 handleTokenTypeCheck(MJLexer.LPARENS);
                 handleTokenTypeCheck(MJLexer.RPARENS);
-                head = new NewObjectDeclExpr(twoAhead.getText());
+                head = new NewObjectDeclExpr(oneAhead.getLine(), twoAhead.getText());
             } else {
                 throw new AssertionError(
                         String.format("Failed while trying to parse \"new ...\" in line %d", oneAhead.getLine()));
@@ -307,7 +307,7 @@ public class MJParser {
             break;
         case MJLexer.NOT:
             ExprNode argument = parseFactor();
-            head = new NotExpr(argument);
+            head = new NotExpr(oneAhead.getLine(), argument);
             break;
         case MJLexer.LPARENS:
             head = parseExpr();
@@ -323,20 +323,20 @@ public class MJParser {
             handleTokenTypeCheck(MJLexer.LBRACKET);
             ExprNode index = parseExpr();
             handleTokenTypeCheck(MJLexer.RBRACKET);
-            head = new ArrayAccessExpr(head, index);
+            head = new ArrayAccessExpr(oneAhead.getLine(), head, index);
             break;
         case MJLexer.DOT:
             handleTokenTypeCheck(MJLexer.DOT);
             Token nextToken = nextToken();
             if (nextToken.getType() == MJLexer.LENGTH_KW) {
-                head = new LengthExpr(head);
+                head = new LengthExpr(oneAhead.getLine(), head);
             } else if (nextToken.getType() == MJLexer.ID) {
-                ExprNode fieldId = new IdentifierExpr(nextToken.getText());
-                head = new DotExpr(head, fieldId);
+                ExprNode fieldId = new IdentifierExpr(oneAhead.getLine(), nextToken.getText());
+                head = new DotExpr(oneAhead.getLine(), head, fieldId);
                 while (lookahead(1).getType() == MJLexer.DOT) {
                     handleTokenTypeCheck(MJLexer.DOT);
-                    fieldId = new IdentifierExpr(handleTokenTypeCheck(MJLexer.ID).getText());
-                    head = new DotExpr(head, fieldId);
+                    fieldId = new IdentifierExpr(oneAhead.getLine(), handleTokenTypeCheck(MJLexer.ID).getText());
+                    head = new DotExpr(oneAhead.getLine(), head, fieldId);
                 }
                 handleTokenTypeCheck(MJLexer.LPARENS);
                 List<ExprNode> args = new ArrayList<>();
@@ -348,7 +348,7 @@ public class MJParser {
                     }
                 }
                 handleTokenTypeCheck(MJLexer.RPARENS);
-                head = new MethodCallExpr(head, args);
+                head = new MethodCallExpr(oneAhead.getLine(), head, args);
             } else {
                 throw new AssertionError(String.format(
                         "Failed while trying to parse expression of form \"A.B\" in line %d", oneAhead.getLine()));
@@ -363,7 +363,7 @@ public class MJParser {
         while (lookahead(1).getType() == MJLexer.MULT) {
             handleTokenTypeCheck(MJLexer.MULT);
             ExprNode rightOperand = parseFactor();
-            head = new MultExpr(head, rightOperand);
+            head = new MultExpr(lookahead(1).getLine(), head, rightOperand);
         }
         return head;
     }
@@ -375,16 +375,16 @@ public class MJParser {
             ExprNode rightOperand = parseTerm();
             switch (op.getType()) {
             case MJLexer.PLUS:
-                head = new AddExpr(head, rightOperand);
+                head = new AddExpr(op.getLine(), head, rightOperand);
                 break;
             case MJLexer.MINUS:
-                head = new SubExpr(head, rightOperand);
+                head = new SubExpr(op.getLine(), head, rightOperand);
                 break;
             case MJLexer.AND:
-                head = new AndExpr(head, rightOperand);
+                head = new AndExpr(op.getLine(), head, rightOperand);
                 break;
             case MJLexer.LT:
-                head = new LtExpr(head, rightOperand);
+                head = new LtExpr(op.getLine(), head, rightOperand);
                 break;
             }
         }

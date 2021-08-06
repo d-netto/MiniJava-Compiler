@@ -4,11 +4,12 @@ import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
 import semantics.TypesVisitor;
 
-public class PrintStatement implements StatementNode {
+public class PrintStatement extends StatementNode {
 
     private final ExprNode printExpr;
 
-    public PrintStatement(ExprNode printExpr) {
+    public PrintStatement(int line, ExprNode printExpr) {
+        super(line);
         this.printExpr = printExpr;
     }
 
@@ -16,7 +17,7 @@ public class PrintStatement implements StatementNode {
         return printExpr;
     }
 
-    public String prettyPrint(String identation) {
+    @Override public String prettyPrint(String identation) {
         return identation + "PrintStatement:" + "\n" + printExpr.prettyPrint(identation + "\t");
     }
 

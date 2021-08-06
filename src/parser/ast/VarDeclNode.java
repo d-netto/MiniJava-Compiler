@@ -8,14 +8,18 @@ import semantics.types.Variable;
 
 public class VarDeclNode {
 
-    private final int lineDecl;
+    private final int line;
     private final String varType;
     private final String varName;
 
-    public VarDeclNode(int lineDecl, String varType, String varName) {
-        this.lineDecl = lineDecl;
+    public VarDeclNode(int line, String varType, String varName) {
+        this.line = line;
         this.varType = varType;
         this.varName = varName;
+    }
+
+    public int getLine() {
+        return line;
     }
 
     public String getVarType() {

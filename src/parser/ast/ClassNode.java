@@ -9,17 +9,23 @@ import semantics.TypesVisitor;
 
 public class ClassNode {
 
+    private final int line;
     private final String className;
     private final Optional<String> extendsFrom;
     private final List<VarDeclNode> varDecls;
     private final List<MethodDeclNode> methodDecls;
 
-    public ClassNode(String className, Optional<String> extendsFrom, List<VarDeclNode> varDecls,
+    public ClassNode(int line, String className, Optional<String> extendsFrom, List<VarDeclNode> varDecls,
             List<MethodDeclNode> methodDecls) {
+        this.line = line;
         this.className = className;
         this.extendsFrom = extendsFrom;
         this.varDecls = varDecls;
         this.methodDecls = methodDecls;
+    }
+
+    public int getLine() {
+        return line;
     }
 
     public String getClassName() {
@@ -39,14 +45,15 @@ public class ClassNode {
     }
 
     public String prettyPrint(String identation) {
-        String str = "ClassNode:" + "\n" + identation + "\t" + (extendsFrom.isPresent() ? extendsFrom.get() : "");
+        StringBuilder strBuilder = new StringBuilder(
+                "ClassNode:" + "\n" + identation + "\t" + (extendsFrom.isPresent() ? extendsFrom.get() : ""));
         for (VarDeclNode varDecl : varDecls) {
-            str += "\n" + varDecl.prettyPrint(identation + "\t");
+            strBuilder.append("\n" + varDecl.prettyPrint(identation + "\t"));
         }
         for (MethodDeclNode methodDecl : methodDecls) {
-            str += "\n" + methodDecl.prettyPrint(identation + "\t");
+            strBuilder.append("\n" + methodDecl.prettyPrint(identation + "\t"));
         }
-        return identation + str;
+        return identation + strBuilder.toString();
     }
 
     public void accept(BuilderVisitor vis) {

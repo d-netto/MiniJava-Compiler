@@ -3,10 +3,20 @@ package parser.ast.interfaces;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
-public interface ExprNode {
+public abstract class ExprNode {
 
-    public String prettyPrint(String string);
+    protected int line;
 
-    public Type accept(TypesVisitor vis);
+    public ExprNode(int line) {
+        this.line = line;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public abstract String prettyPrint(String string);
+
+    public abstract Type accept(TypesVisitor vis);
 
 }

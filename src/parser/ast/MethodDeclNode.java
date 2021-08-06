@@ -13,6 +13,7 @@ import utils.Pair;
 
 public class MethodDeclNode {
 
+    private final int line;
     private final String methodType;
     private final String methodName;
     private final List<Pair<String, String>> methodArgs;
@@ -20,14 +21,19 @@ public class MethodDeclNode {
     private final List<StatementNode> statements;
     private final ExprNode returnExpr;
 
-    public MethodDeclNode(String methodType, String methodName, List<Pair<String, String>> methodArgs,
+    public MethodDeclNode(int line, String methodType, String methodName, List<Pair<String, String>> methodArgs,
             List<VarDeclNode> varDecls, List<StatementNode> statements, ExprNode returnExpr) {
+        this.line = line;
         this.methodType = methodType;
         this.methodName = methodName;
         this.methodArgs = methodArgs;
         this.varDecls = varDecls;
         this.statements = statements;
         this.returnExpr = returnExpr;
+    }
+
+    public int getLine() {
+        return line;
     }
 
     public String getMethodType() {
@@ -55,19 +61,19 @@ public class MethodDeclNode {
     }
 
     public String prettyPrint(String identation) {
-        String str = "MethodDeclNode:" + "\n" + identation + "\t" + methodType;
-        str += "\n" + identation + "\t" + methodName;
+        StringBuilder strBuilder = new StringBuilder("MethodDeclNode:" + "\n" + identation + "\t" + methodType);
+        strBuilder.append("\n" + identation + "\t" + methodName);
         for (Pair<String, String> pairArg : methodArgs) {
-            str += "\n" + identation + "\t" + pairArg.first() + " " + pairArg + pairArg.second();
+            strBuilder.append("\n" + identation + "\t" + pairArg.first() + " " + pairArg + pairArg.second());
         }
         for (VarDeclNode varDecl : varDecls) {
-            str += "\n" + varDecl.prettyPrint(identation + "\t");
+            strBuilder.append("\n" + varDecl.prettyPrint(identation + "\t"));
         }
         for (StatementNode statement : statements) {
-            str += "\n" + statement.prettyPrint(identation + "\t");
+            strBuilder.append("\n" + statement.prettyPrint(identation + "\t"));
         }
-        str += "\n" + returnExpr.prettyPrint(identation + "\t");
-        return identation + str;
+        strBuilder.append("\n" + returnExpr.prettyPrint(identation + "\t"));
+        return identation + strBuilder.toString();
     }
 
     public void accept(BuilderVisitor vis, Map<String, MethodType> fields) {

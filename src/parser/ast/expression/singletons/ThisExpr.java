@@ -4,13 +4,17 @@ import parser.ast.interfaces.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
-public class ThisExpr implements ExprNode {
+public class ThisExpr extends ExprNode {
 
-    public String prettyPrint(String identation) {
+    public ThisExpr(int line) {
+        super(line);
+    }
+
+    @Override public String prettyPrint(String identation) {
         return identation + "ThisExpr";
     }
 
-    public Type accept(TypesVisitor vis) {
+    @Override public Type accept(TypesVisitor vis) {
         return vis.visit(this);
     }
 

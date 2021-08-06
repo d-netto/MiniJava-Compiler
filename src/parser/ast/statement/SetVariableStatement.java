@@ -4,14 +4,13 @@ import parser.ast.interfaces.ExprNode;
 import parser.ast.interfaces.StatementNode;
 import semantics.TypesVisitor;
 
-public class SetVariableStatement implements StatementNode {
+public class SetVariableStatement extends StatementNode {
 
-    private final int lineAssignment;
     private final String varAssignedName;
     private final ExprNode rightHandSide;
 
-    public SetVariableStatement(int lineAssignment, String varAssignedName, ExprNode rightHandSide) {
-        this.lineAssignment = lineAssignment;
+    public SetVariableStatement(int line, String varAssignedName, ExprNode rightHandSide) {
+        super(line);
         this.varAssignedName = varAssignedName;
         this.rightHandSide = rightHandSide;
     }
@@ -24,7 +23,7 @@ public class SetVariableStatement implements StatementNode {
         return rightHandSide;
     }
 
-    public String prettyPrint(String identation) {
+    @Override public String prettyPrint(String identation) {
         return identation + "SetVariableStatement:" + "\n" + identation + "\t" + varAssignedName + "\n"
                 + rightHandSide.prettyPrint(identation + "\t");
     }

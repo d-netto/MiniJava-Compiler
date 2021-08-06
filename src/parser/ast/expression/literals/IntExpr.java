@@ -4,19 +4,20 @@ import parser.ast.interfaces.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
-public class IntExpr implements ExprNode {
+public class IntExpr extends ExprNode {
 
     private final String integerVal;
 
-    public IntExpr(String integerVal) {
+    public IntExpr(int line, String integerVal) {
+        super(line);
         this.integerVal = integerVal;
     }
 
-    public String prettyPrint(String identation) {
+    @Override public String prettyPrint(String identation) {
         return identation + "IntExpr: " + integerVal;
     }
 
-    public Type accept(TypesVisitor vis) {
+    @Override public Type accept(TypesVisitor vis) {
         return vis.visit(this);
     }
 

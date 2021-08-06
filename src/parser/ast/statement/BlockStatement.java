@@ -6,11 +6,12 @@ import java.util.List;
 import parser.ast.interfaces.StatementNode;
 import semantics.TypesVisitor;
 
-public class BlockStatement implements StatementNode {
+public class BlockStatement extends StatementNode {
 
     private List<StatementNode> statements;
 
-    public BlockStatement(List<StatementNode> statements) {
+    public BlockStatement(int line, List<StatementNode> statements) {
+        super(line);
         this.statements = statements;
     }
 
@@ -18,12 +19,12 @@ public class BlockStatement implements StatementNode {
         return new ArrayList<>(statements);
     }
 
-    public String prettyPrint(String identation) {
-        String str = "BlockStatement:";
+    @Override public String prettyPrint(String identation) {
+        StringBuilder strBuilder = new StringBuilder("BlockStatement:");
         for (StatementNode statement : statements) {
-            str += statement.prettyPrint(identation + "\t");
+            strBuilder.append(statement.prettyPrint(identation + "\t"));
         }
-        return identation + str;
+        return identation + strBuilder.toString();
     }
 
     public void accept(TypesVisitor vis) {

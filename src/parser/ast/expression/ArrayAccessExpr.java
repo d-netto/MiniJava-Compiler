@@ -4,12 +4,13 @@ import parser.ast.interfaces.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
-public class ArrayAccessExpr implements ExprNode {
+public class ArrayAccessExpr extends ExprNode {
 
     private final ExprNode array;
     private final ExprNode index;
 
-    public ArrayAccessExpr(ExprNode array, ExprNode index) {
+    public ArrayAccessExpr(int line, ExprNode array, ExprNode index) {
+        super(line);
         this.array = array;
         this.index = index;
     }
@@ -18,12 +19,12 @@ public class ArrayAccessExpr implements ExprNode {
         return array;
     }
 
-    public String prettyPrint(String identation) {
+    @Override public String prettyPrint(String identation) {
         return identation + "ArrayAccessExpr:" + "\n" + array.prettyPrint(identation + "\t") + "\n"
                 + index.prettyPrint(identation + "\t");
     }
 
-    public Type accept(TypesVisitor vis) {
+    @Override public Type accept(TypesVisitor vis) {
         return vis.visit(this);
     }
 

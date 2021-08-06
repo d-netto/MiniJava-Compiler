@@ -250,7 +250,7 @@ public class TypesVisitor {
     public void visit(SetArrayIndexStatement statement) {
         Variable variable = getVar(statement.getVarAssignedName(), statement.getLine());
         variable.setVariable();
-        assert variable.getType().isIntArrayType() : "Type mismatch";
+        assert variable.getType().isIntArrayType() : String.format("Type mismatch in line %d", statement.getLine());
         assert statement.getIndex().accept(this).isIntType() : String.format("Type mismatch in line %d",
                 statement.getLine());
         assert statement.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
@@ -260,8 +260,17 @@ public class TypesVisitor {
     public void visit(SetVariableStatement statement) {
         Variable variable = getVar(statement.getVarAssignedName(), statement.getLine());
         variable.setVariable();
-        assert variable.getType().equals(statement.getRightHandSide().accept(this)) : String
-                .format("Type mismatch in line %d", statement.getLine());
+        Type variableType = variable.getType();
+        Type rightHandSideType = statement.getRightHandSide().accept(this);
+        if (variableType.isClassType()) {
+            assert rightHandSideType.isClassType() : String
+                    .format("Right hand side in line %d should be a memeber of a class", statement.getLine());
+            assert ((ClassType) rightHandSideType).containsClassAsParent(((ClassType) variableType)) : String
+                    .format("Type mismatch in line %d", statement.getLine());
+        } else {
+            assert variable.getType().equals(statement.getRightHandSide().accept(this)) : String
+                    .format("Type mismatch in line %d", statement.getLine());
+        }
     }
 
     public void visit(WhileStatement statement) {
@@ -298,7 +307,7 @@ public class TypesVisitor {
             statement.accept(this);
         }
         assert builderVis.getType(node.getMethodType(), node.getLine())
-                .equals(node.getReturnExpr().accept(this)) : "Type mismatch";
+                .equals(node.getReturnExpr().accept(this)) : String.format("Type mismatch in line %d", node.getLine());
     }
 
     public void visit(VarDeclNode node) {

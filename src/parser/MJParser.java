@@ -153,7 +153,8 @@ public class MJParser {
         handleTokenTypeCheck(MJLexer.CLASS_KW);
         Token className = handleTokenTypeCheck(MJLexer.ID);
         Optional<String> extendsFrom = Optional.empty();
-        if (scanner.getToken().getType() == MJLexer.EXTENDS_KW) {
+        if (lookahead(1).getType() == MJLexer.EXTENDS_KW) {
+            handleTokenTypeCheck(MJLexer.EXTENDS_KW);
             extendsFrom = Optional.of(handleTokenTypeCheck(MJLexer.ID).getText());
         }
         handleTokenTypeCheck(MJLexer.CURLY_LBRACKET);

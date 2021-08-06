@@ -29,6 +29,18 @@ public class SemanticsTest {
         goal.accept(typesVis);
     }
 
+    @Test public void TestBinaryTree() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_tree.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        GoalNode goal = mjParser.parseGoal();
+        BuilderVisitor builderVis = new BuilderVisitor();
+        goal.accept(builderVis);
+        TypesVisitor typesVis = new TypesVisitor(builderVis);
+        goal.accept(typesVis);
+    }
+
     @Test public void TestBubbleSort() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/bubble_sort.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -41,8 +53,8 @@ public class SemanticsTest {
         goal.accept(typesVis);
     }
 
-    @Test public void TestQuickSort() throws IOException {
-        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/quick_sort.mjava")));
+    @Test public void TestFactorial() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/factorial.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
@@ -67,6 +79,30 @@ public class SemanticsTest {
 
     @Test public void TestLinkedList() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linked_list.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        GoalNode goal = mjParser.parseGoal();
+        BuilderVisitor builderVis = new BuilderVisitor();
+        goal.accept(builderVis);
+        TypesVisitor typesVis = new TypesVisitor(builderVis);
+        goal.accept(typesVis);
+    }
+
+    @Test public void TestQuickSort() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/quick_sort.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        GoalNode goal = mjParser.parseGoal();
+        BuilderVisitor builderVis = new BuilderVisitor();
+        goal.accept(builderVis);
+        TypesVisitor typesVis = new TypesVisitor(builderVis);
+        goal.accept(typesVis);
+    }
+
+    @Test public void TestTreeVisitor() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/tree_visitor.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);

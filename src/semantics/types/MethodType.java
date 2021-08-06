@@ -1,7 +1,5 @@
 package semantics.types;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,11 +37,11 @@ public class MethodType extends Type {
     }
 
     public List<Pair<String, Variable>> getArguments() {
-        return new ArrayList<>(arguments);
+        return arguments;
     }
 
     public Map<String, Variable> getVarsDecl() {
-        return new HashMap<>(varsDecl);
+        return varsDecl;
     }
 
 }

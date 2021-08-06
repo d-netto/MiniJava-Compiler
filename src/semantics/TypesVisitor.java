@@ -64,10 +64,14 @@ public class TypesVisitor {
                 }
             }
         }
-        if (currentClass != null && currentClass.getFields().containsKey(name)) {
-            return currentClass.getFields().get(name);
+        if (currentClass != null) {
+            for (ClassType classType : currentClass.getAllParents()) {
+                if (classType.getFields().containsKey(name)) {
+                    return classType.getFields().get(name);
+                }
+            }
         }
-        throw new AssertionError(String.format("Variable \"%s\" was not defined", name));
+        throw new AssertionError(String.format("Variable \"%s\" used in line %d was not defined", name, line));
     }
 
     public Type visit(IdentifierExpr expr) {
@@ -91,15 +95,22 @@ public class TypesVisitor {
     }
 
     public Type visit(AddExpr expr) {
-        assert expr.getLeftHandSide().accept(this).isIntType()
-                && expr.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
-                        expr.getLine());
+        Type leftHandSide = expr.getLeftHandSide().accept(this);
+        Type rightHandSide = expr.getRightHandSide().accept(this);
+        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
+                .format("Variable(s) in line %d has/have not been set", expr.getLine());
+        assert leftHandSide.isIntType() && rightHandSide.isIntType() : String.format("Type mismatch in line %d",
+                expr.getLine());
         return new IntType();
     }
 
     public Type visit(AndExpr expr) {
-        assert expr.getLeftHandSide().accept(this).isBooleanType()
-                && expr.getRightHandSide().accept(this).isBooleanType() : "Type mismatch";
+        Type leftHandSide = expr.getLeftHandSide().accept(this);
+        Type rightHandSide = expr.getRightHandSide().accept(this);
+        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
+                .format("Variable(s) in line %d has/have not been set", expr.getLine());
+        assert leftHandSide.isBooleanType() && rightHandSide.isBooleanType() : String.format("Type mismatch in line %d",
+                expr.getLine());
         return new BooleanType();
     }
 
@@ -111,7 +122,10 @@ public class TypesVisitor {
             return currentClass.getMethods().get(rightHandSideName);
         } else if (leftHandSide instanceof IdentifierExpr) {
             String varName = ((IdentifierExpr) leftHandSide).getIdentifierName();
-            return ((ClassType) getVar(varName, expr.getLine()).getType()).getMethods().get(rightHandSideName);
+            Variable variable = getVar(varName, expr.getLine());
+            assert variable.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
+                    expr.getLine());
+            return ((ClassType) variable.getType()).getMethods().get(rightHandSideName);
         } else if (leftHandSide instanceof NewObjectDeclExpr) {
             String className = ((NewObjectDeclExpr) leftHandSide).getObjectName();
             return builderVis.getClassType(className, expr.getLine()).getMethods().get(rightHandSideName);
@@ -119,45 +133,57 @@ public class TypesVisitor {
         Type leftHandSideType = leftHandSide.accept(this);
         assert leftHandSideType instanceof ClassType : "Internal error in DotExpr";
         ClassType classType = (ClassType) leftHandSideType;
-        assert classType.getFields().containsKey(rightHandSideName) : String.format(
-                "Field \"%s\" mentioned in line %d has not been defined in class", rightHandSideName, expr.getLine());
+        assert classType.getMethods().containsKey(rightHandSideName) : String
+                .format("Method \"%s\" from line %d not defined in its class", rightHandSideName, expr.getLine());
         return classType.getMethods().get(rightHandSideName);
     }
 
     public Type visit(LtExpr expr) {
-        assert expr.getLeftHandSide().accept(this).isIntType()
-                && expr.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
-                        expr.getLine());
-        ;
+        Type leftHandSide = expr.getLeftHandSide().accept(this);
+        Type rightHandSide = expr.getRightHandSide().accept(this);
+        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
+                .format("Variable(s) in line %d has/have not been set", expr.getLine());
+        assert leftHandSide.isIntType() && rightHandSide.isIntType() : String.format("Type mismatch in line %d",
+                expr.getLine());
         return new BooleanType();
     }
 
     public Type visit(MultExpr expr) {
-        assert expr.getLeftHandSide().accept(this).isIntType()
-                && expr.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
-                        expr.getLine());
-        ;
+        Type leftHandSide = expr.getLeftHandSide().accept(this);
+        Type rightHandSide = expr.getRightHandSide().accept(this);
+        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
+                .format("Variable(s) in line %d has/have not been set", expr.getLine());
+        assert leftHandSide.isIntType() && rightHandSide.isIntType() : String.format("Type mismatch in line %d",
+                expr.getLine());
         return new IntType();
     }
 
     public Type visit(SubExpr expr) {
-        assert expr.getLeftHandSide().accept(this).isIntType()
-                && expr.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
-                        expr.getLine());
-        ;
+        Type leftHandSide = expr.getLeftHandSide().accept(this);
+        Type rightHandSide = expr.getRightHandSide().accept(this);
+        assert leftHandSide.hasBeenSet() && rightHandSide.hasBeenSet() : String
+                .format("Variable(s) in line %d has/have not been set", expr.getLine());
+        assert leftHandSide.isIntType() && rightHandSide.isIntType() : String.format("Type mismatch in line %d",
+                expr.getLine());
         return new IntType();
     }
 
     public Type visit(ArrayAccessExpr expr) {
-        assert expr.getArray().accept(this).isIntArrayType() : String
+        Type arrayVariable = expr.getArray().accept(this);
+        Type index = expr.getIndex().accept(this);
+        assert arrayVariable.hasBeenSet() && index.hasBeenSet() : String
+                .format("Variable(s) in line %d has/have not been set", expr.getLine());
+        assert arrayVariable.isIntArrayType() && index.isIntType() : String
                 .format("Expression in line %d does not define an array", expr.getLine());
         return new IntType();
     }
 
     public Type visit(LengthExpr expr) {
-        assert expr.getLenExpr().accept(this).isIntArrayType() : String
-                .format("Expression in line %d does not define an array", expr.getLine());
-        ;
+        Type arrayVariable = expr.getLenExpr().accept(this);
+        assert arrayVariable.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
+                expr.getLine());
+        assert arrayVariable.isIntArrayType() : String.format("Expression in line %d does not define an array",
+                expr.getLine());
         return new IntType();
     }
 
@@ -169,9 +195,17 @@ public class TypesVisitor {
         assert argListForExpr.size() == args.size() : String
                 .format("Number of arguments mismatch in method call in line", expr.getLine());
         for (int i = 0; i < argListForExpr.size(); i++) {
-            Type argType = argListForExpr.get(i).accept(this);
-            assert argType.equals(args.get(i).second().getType()) : String.format("Type mismatch in argument call %s",
-                    expr.prettyPrint(""));
+            Type argSigType = args.get(i).second().getType();
+            Type argCallType = argListForExpr.get(i).accept(this);
+            if (argSigType.isClassType()) {
+                assert argCallType.isClassType() : String
+                        .format("Argument type in function call in line %d should be a class", expr.getLine());
+                assert ((ClassType) argCallType).containsClassAsParent(((ClassType) argSigType)) : String
+                        .format("Type mismatch in argument call in line %d", expr.getLine());
+            } else {
+                assert argSigType.equals(argCallType) : String.format("Type mismatch in argument call in line %d",
+                        expr.getLine());
+            }
         }
         return ((MethodType) method).getReturnType();
     }
@@ -185,8 +219,9 @@ public class TypesVisitor {
     }
 
     public Type visit(NotExpr expr) {
-        assert expr.getArgument().accept(this).isBooleanType() : String.format("Type mismatch in line %d",
-                expr.getLine());
+        Type argument = expr.getArgument().accept(this);
+        assert argument.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set", expr.getLine());
+        assert argument.isBooleanType() : String.format("Type mismatch in line %d", expr.getLine());
         return new BooleanType();
     }
 
@@ -197,19 +232,25 @@ public class TypesVisitor {
     }
 
     public void visit(IfStatement statement) {
-        assert statement.getIfCondition().accept(this).isBooleanType() : String.format("Type mismatch in line %d",
+        Type ifCondition = statement.getIfCondition().accept(this);
+        assert ifCondition.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
                 statement.getLine());
+        assert ifCondition.isBooleanType() : String.format("Type mismatch in line %d", statement.getLine());
         statement.getIfBlock().accept(this);
         statement.getElseBlock().accept(this);
     }
 
     public void visit(PrintStatement statement) {
-        assert statement.getPrintExpr().accept(this).isIntType() : String.format("Type mismatch in line %d",
+        Type printExpr = statement.getPrintExpr().accept(this);
+        assert printExpr.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
                 statement.getLine());
+        assert printExpr.isIntType() : String.format("Type mismatch in line %d", statement.getLine());
     }
 
     public void visit(SetArrayIndexStatement statement) {
-        assert getVar(statement.getVarAssignedName(), statement.getLine()).getType().isIntArrayType() : "Type mismatch";
+        Variable variable = getVar(statement.getVarAssignedName(), statement.getLine());
+        variable.setVariable();
+        assert variable.getType().isIntArrayType() : "Type mismatch";
         assert statement.getIndex().accept(this).isIntType() : String.format("Type mismatch in line %d",
                 statement.getLine());
         assert statement.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
@@ -217,16 +258,17 @@ public class TypesVisitor {
     }
 
     public void visit(SetVariableStatement statement) {
-        assert getVar(statement.getVarAssignedName(), statement.getLine()).getType()
-                .equals(statement.getRightHandSide().accept(this)) : String.format("Type mismatch in line %d",
-                        statement.getLine());
-        ;
+        Variable variable = getVar(statement.getVarAssignedName(), statement.getLine());
+        variable.setVariable();
+        assert variable.getType().equals(statement.getRightHandSide().accept(this)) : String
+                .format("Type mismatch in line %d", statement.getLine());
     }
 
     public void visit(WhileStatement statement) {
-        assert statement.getWhileCondition().accept(this).isBooleanType() : String.format("Type mismatch in line %d",
+        Type whileCondition = statement.getWhileCondition().accept(this);
+        assert whileCondition.hasBeenSet() : String.format("Variable(s) in line %d has/have not been set",
                 statement.getLine());
-        ;
+        assert whileCondition.isBooleanType() : String.format("Type mismatch in line %d", statement.getLine());
         statement.getWhileBlock().accept(this);
     }
 

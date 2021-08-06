@@ -26,4 +26,8 @@ public abstract class Type {
         return false;
     }
 
+    public boolean hasBeenSet() {
+        return true;
+    }
+
 }

@@ -19,6 +19,10 @@ public class ArrayAccessExpr extends ExprNode {
         return array;
     }
 
+    public ExprNode getIndex() {
+        return index;
+    }
+
     @Override public String prettyPrint(String identation) {
         return identation + "ArrayAccessExpr:" + "\n" + array.prettyPrint(identation + "\t") + "\n"
                 + index.prettyPrint(identation + "\t");

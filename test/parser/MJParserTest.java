@@ -144,22 +144,18 @@ public class MJParserTest {
         mjParser.parseGoal();
     }
 
-    @Test public void TestFactorial() throws IOException {
-        String simpleProgram = "class Factorial{\n" + "    public static void main(String[] a){\n"
-                + "    System.out.println(new Fac().ComputeFac(10));\n" + "    }\n" + "}\n" + "\n" + "class Fac {\n"
-                + "\n" + "    public int ComputeFac(int num){\n" + "    int num_aux ;\n" + "    if (num < 1)\n"
-                + "        num_aux = 1 ;\n" + "    else \n" + "        num_aux = num * (this.ComputeFac(num-1)) ;\n"
-                + "    return num_aux ;\n" + "    }\n" + "\n" + "}";
+    // All of the following test files were taken form
+    // https://www.cambridge.org/resources/052182060X/
+    @Test public void TestBinarySearch() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_search.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
         mjParser.parseGoal();
     }
 
-    // All of the following test files were taken form
-    // https://www.cambridge.org/resources/052182060X/
-    @Test public void TestBinarySearch() throws IOException {
-        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_search.mjava")));
+    @Test public void TestBinaryTree() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_tree.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
@@ -174,8 +170,8 @@ public class MJParserTest {
         mjParser.parseGoal();
     }
 
-    @Test public void TestQuickSort() throws IOException {
-        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/quick_sort.mjava")));
+    @Test public void TestFactorial() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/factorial.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
         MJParser mjParser = new MJParser(mjLexer);
@@ -198,4 +194,19 @@ public class MJParserTest {
         mjParser.parseGoal();
     }
 
+    @Test public void TestQuickSort() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/quick_sort.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseGoal();
+    }
+
+    @Test public void TestTreeVisitor() throws IOException {
+        String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/tree_visitor.mjava")));
+        InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
+        MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
+        MJParser mjParser = new MJParser(mjLexer);
+        mjParser.parseGoal();
+    }
 }

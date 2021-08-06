@@ -18,7 +18,7 @@ public class Variable extends Type {
         return type;
     }
 
-    public boolean hasBeenSet() {
+    @Override public boolean hasBeenSet() {
         return hasBeenSet;
     }
 

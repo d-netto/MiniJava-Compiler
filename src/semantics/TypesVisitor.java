@@ -225,15 +225,16 @@ public class TypesVisitor {
     }
 
     public void visit(SetVariableStatement statement) {
-        Type variable = getVar(statement.getVarAssignedName(), statement.getLine());
+        Type variableType = getVar(statement.getVarAssignedName(), statement.getLine());
         Type rightHandSideType = statement.getRightHandSide().accept(this);
-        if (variable.isClassType()) {
+        if (variableType.isClassType()) {
             assert rightHandSideType.isClassType() : String
                     .format("Right hand side in line %d should be a non-primitive object", statement.getLine());
-            assert ((ClassType) rightHandSideType).containsClassAsParent(((ClassType) variable)) : String
+            assert ((ClassType) rightHandSideType).containsClassAsParent(((ClassType) variableType)) : String
                     .format("Type mismatch in line %d", statement.getLine());
         } else {
-            assert variable.equals(rightHandSideType) : String.format("Type mismatch in line %d", statement.getLine());
+            assert variableType.equals(rightHandSideType) : String.format("Type mismatch in line %d",
+                    statement.getLine());
         }
     }
 

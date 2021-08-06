@@ -119,6 +119,8 @@ public class BuilderVisitor {
                                         "Overwritten method in %d should be called with the same parameter types as the method in parent class",
                                         node.getLine());
                     }
+                    assert !(argumentsMethodFromParentIter.hasNext()) : String
+                            .format("Number of arguments mismatch in overwritten method from line %d", node.getLine());
                 }
             }
         }

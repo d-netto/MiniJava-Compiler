@@ -169,8 +169,8 @@ public class TypesVisitor {
             Type argCallType = argListForExprIter.next().accept(this);
             Type argSigType = argListIter.next().getType();
             if (argSigType.isClassType()) {
-                assert argCallType.isClassType() : String
-                        .format("Argument type in function call in line %d should be a class", expr.getLine());
+                assert argCallType.isClassType() : String.format(
+                        "Argument type in function call in line %d should be a non-primitive object", expr.getLine());
                 assert ((ClassType) argCallType).containsClassAsParent(((ClassType) argSigType)) : String
                         .format("Type mismatch in argument call in line %d", expr.getLine());
             } else {
@@ -229,7 +229,7 @@ public class TypesVisitor {
         Type rightHandSideType = statement.getRightHandSide().accept(this);
         if (variable.isClassType()) {
             assert rightHandSideType.isClassType() : String
-                    .format("Right hand side in line %d should be a memeber of a class", statement.getLine());
+                    .format("Right hand side in line %d should be a non-primitive object", statement.getLine());
             assert ((ClassType) rightHandSideType).containsClassAsParent(((ClassType) variable)) : String
                     .format("Type mismatch in line %d", statement.getLine());
         } else {
@@ -244,6 +244,7 @@ public class TypesVisitor {
     }
 
     public void visit(ClassNode node) {
+        currentClass = builderVis.getClassType(node.getClassName(), node.getLine());
         for (VarDeclNode varDecl : node.getVarDecls()) {
             varDecl.accept(this);
         }
@@ -255,7 +256,6 @@ public class TypesVisitor {
     public void visit(GoalNode node) {
         node.getStatement().accept(this);
         for (ClassNode classNode : node.getClasses()) {
-            currentClass = builderVis.getClassType(classNode.getClassName(), node.getLine());
             classNode.accept(this);
         }
     }

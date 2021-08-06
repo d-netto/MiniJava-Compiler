@@ -1,9 +1,8 @@
 package parser.ast;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import parser.ast.interfaces.StatementNode;
+import parser.ast.base_abs_classes.StatementNode;
 import semantics.BuilderVisitor;
 import semantics.TypesVisitor;
 
@@ -32,15 +31,15 @@ public class GoalNode {
     }
 
     public List<ClassNode> getClasses() {
-        return new ArrayList<>(classes);
+        return classes;
     }
 
-    public String prettyPrint(String identation) {
+    public String prettyString(String identation) {
         StringBuilder strBuilder = new StringBuilder("GoalNode:" + "\n" + identation + "\t" + mainClassName);
         strBuilder.append("\n" + identation + "\t" + argName);
-        strBuilder.append("\n" + statement.prettyPrint(identation + "\t"));
+        strBuilder.append("\n" + statement.prettyString(identation + "\t"));
         for (ClassNode _class : classes) {
-            strBuilder.append("\n" + _class.prettyPrint(identation + "\t"));
+            strBuilder.append("\n" + _class.prettyString(identation + "\t"));
         }
         return identation + strBuilder.toString();
     }

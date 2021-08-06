@@ -1,6 +1,6 @@
 package parser.ast.expression;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
@@ -23,9 +23,9 @@ public class ArrayAccessExpr extends ExprNode {
         return index;
     }
 
-    @Override public String prettyPrint(String identation) {
-        return identation + "ArrayAccessExpr:" + "\n" + array.prettyPrint(identation + "\t") + "\n"
-                + index.prettyPrint(identation + "\t");
+    @Override public String prettyString(String identation) {
+        return identation + "ArrayAccessExpr:" + "\n" + array.prettyString(identation + "\t") + "\n"
+                + index.prettyString(identation + "\t");
     }
 
     @Override public Type accept(TypesVisitor vis) {

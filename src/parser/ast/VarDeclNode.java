@@ -30,7 +30,7 @@ public class VarDeclNode {
         return varName;
     }
 
-    public String prettyPrint(String identation) {
+    public String prettyString(String identation) {
         return identation + "VarDeclNode: " + "\n" + identation + "\t" + varType + "\n" + identation + "\t" + varName;
     }
 

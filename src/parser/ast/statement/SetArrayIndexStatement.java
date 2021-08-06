@@ -1,7 +1,7 @@
 package parser.ast.statement;
 
-import parser.ast.interfaces.ExprNode;
-import parser.ast.interfaces.StatementNode;
+import parser.ast.base_abs_classes.ExprNode;
+import parser.ast.base_abs_classes.StatementNode;
 import semantics.TypesVisitor;
 
 public class SetArrayIndexStatement extends StatementNode {
@@ -29,9 +29,9 @@ public class SetArrayIndexStatement extends StatementNode {
         return rightHandSide;
     }
 
-    @Override public String prettyPrint(String identation) {
+    @Override public String prettyString(String identation) {
         return identation + "SetArrayIndexStatement:" + "\n" + identation + "\t" + varAssignedName + "\n"
-                + index.prettyPrint(identation + "\t") + "\n" + rightHandSide.prettyPrint(identation + "\t");
+                + index.prettyString(identation + "\t") + "\n" + rightHandSide.prettyString(identation + "\t");
     }
 
     public void accept(TypesVisitor vis) {

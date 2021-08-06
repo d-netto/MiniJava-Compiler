@@ -3,7 +3,7 @@ package parser.ast.expression;
 import java.util.ArrayList;
 import java.util.List;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
@@ -26,11 +26,11 @@ public class MethodCallExpr extends ExprNode {
         return new ArrayList<>(args);
     }
 
-    @Override public String prettyPrint(String identation) {
+    @Override public String prettyString(String identation) {
         StringBuilder strBuilder = new StringBuilder(
-                "MethodCallExpr:" + "\n" + methodNameExpr.prettyPrint(identation + "\t"));
+                "MethodCallExpr:" + "\n" + methodNameExpr.prettyString(identation + "\t"));
         for (ExprNode arg : args) {
-            strBuilder.append("\n" + arg.prettyPrint(identation + "\t"));
+            strBuilder.append("\n" + arg.prettyString(identation + "\t"));
         }
         return identation + strBuilder.toString();
     }

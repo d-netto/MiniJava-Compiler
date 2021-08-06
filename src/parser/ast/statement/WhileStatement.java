@@ -1,7 +1,7 @@
 package parser.ast.statement;
 
-import parser.ast.interfaces.ExprNode;
-import parser.ast.interfaces.StatementNode;
+import parser.ast.base_abs_classes.ExprNode;
+import parser.ast.base_abs_classes.StatementNode;
 import semantics.TypesVisitor;
 
 public class WhileStatement extends StatementNode {
@@ -23,9 +23,9 @@ public class WhileStatement extends StatementNode {
         return whileBlock;
     }
 
-    @Override public String prettyPrint(String identation) {
-        return identation + "WhileStatement:" + "\n" + whileCondition.prettyPrint(identation + "\t") + "\n"
-                + whileBlock.prettyPrint(identation + "\t");
+    @Override public String prettyString(String identation) {
+        return identation + "WhileStatement:" + "\n" + whileCondition.prettyString(identation + "\t") + "\n"
+                + whileBlock.prettyString(identation + "\t");
     }
 
     public void accept(TypesVisitor vis) {

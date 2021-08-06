@@ -1,6 +1,6 @@
 package parser.ast.expression.literals;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
@@ -13,7 +13,7 @@ public class IntExpr extends ExprNode {
         this.integerVal = integerVal;
     }
 
-    @Override public String prettyPrint(String identation) {
+    @Override public String prettyString(String identation) {
         return identation + "IntExpr: " + integerVal;
     }
 

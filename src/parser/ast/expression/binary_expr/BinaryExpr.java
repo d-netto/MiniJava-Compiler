@@ -1,6 +1,6 @@
 package parser.ast.expression.binary_expr;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 
 public abstract class BinaryExpr extends ExprNode {
 

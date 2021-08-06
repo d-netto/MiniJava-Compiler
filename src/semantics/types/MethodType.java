@@ -3,16 +3,15 @@ package semantics.types;
 import java.util.List;
 import java.util.Map;
 
-import utils.Pair;
+import utils.VariableHolder;
 
 public class MethodType extends Type {
 
     private final Type returnType;
-    private final List<Pair<String, Variable>> arguments;
+    private final List<VariableHolder> arguments;
     private final Map<String, Variable> varsDecl;
 
-    public MethodType(Type returnType, List<Pair<String, Variable>> arguments,
-            Map<String, Variable> variablesDeclared) {
+    public MethodType(Type returnType, List<VariableHolder> arguments, Map<String, Variable> variablesDeclared) {
         this.returnType = returnType;
         this.arguments = arguments;
         this.varsDecl = variablesDeclared;
@@ -32,7 +31,7 @@ public class MethodType extends Type {
         return returnType;
     }
 
-    public List<Pair<String, Variable>> getArguments() {
+    public List<VariableHolder> getArguments() {
         return arguments;
     }
 

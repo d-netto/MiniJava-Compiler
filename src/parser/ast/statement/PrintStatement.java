@@ -1,7 +1,7 @@
 package parser.ast.statement;
 
-import parser.ast.interfaces.ExprNode;
-import parser.ast.interfaces.StatementNode;
+import parser.ast.base_abs_classes.ExprNode;
+import parser.ast.base_abs_classes.StatementNode;
 import semantics.TypesVisitor;
 
 public class PrintStatement extends StatementNode {
@@ -17,8 +17,8 @@ public class PrintStatement extends StatementNode {
         return printExpr;
     }
 
-    @Override public String prettyPrint(String identation) {
-        return identation + "PrintStatement:" + "\n" + printExpr.prettyPrint(identation + "\t");
+    @Override public String prettyString(String identation) {
+        return identation + "PrintStatement:" + "\n" + printExpr.prettyString(identation + "\t");
     }
 
     public void accept(TypesVisitor vis) {

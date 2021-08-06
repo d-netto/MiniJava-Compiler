@@ -1,11 +1,10 @@
 package parser.ast;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import parser.ast.interfaces.ExprNode;
-import parser.ast.interfaces.StatementNode;
+import parser.ast.base_abs_classes.ExprNode;
+import parser.ast.base_abs_classes.StatementNode;
 import semantics.BuilderVisitor;
 import semantics.TypesVisitor;
 import semantics.types.MethodType;
@@ -45,34 +44,34 @@ public class MethodDeclNode {
     }
 
     public List<Pair<String, String>> getMethodArgs() {
-        return new ArrayList<>(methodArgs);
+        return methodArgs;
     }
 
     public List<VarDeclNode> getVarDecls() {
-        return new ArrayList<>(varDecls);
+        return varDecls;
     }
 
     public List<StatementNode> getStatements() {
-        return new ArrayList<>(statements);
+        return statements;
     }
 
     public ExprNode getReturnExpr() {
         return returnExpr;
     }
 
-    public String prettyPrint(String identation) {
+    public String prettyString(String identation) {
         StringBuilder strBuilder = new StringBuilder("MethodDeclNode:" + "\n" + identation + "\t" + methodType);
         strBuilder.append("\n" + identation + "\t" + methodName);
         for (Pair<String, String> pairArg : methodArgs) {
             strBuilder.append("\n" + identation + "\t" + pairArg.first() + " " + pairArg + pairArg.second());
         }
         for (VarDeclNode varDecl : varDecls) {
-            strBuilder.append("\n" + varDecl.prettyPrint(identation + "\t"));
+            strBuilder.append("\n" + varDecl.prettyString(identation + "\t"));
         }
         for (StatementNode statement : statements) {
-            strBuilder.append("\n" + statement.prettyPrint(identation + "\t"));
+            strBuilder.append("\n" + statement.prettyString(identation + "\t"));
         }
-        strBuilder.append("\n" + returnExpr.prettyPrint(identation + "\t"));
+        strBuilder.append("\n" + returnExpr.prettyString(identation + "\t"));
         return identation + strBuilder.toString();
     }
 

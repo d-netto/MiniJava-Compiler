@@ -1,6 +1,6 @@
 package parser.ast.expression.singletons;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
@@ -10,7 +10,7 @@ public class FalseExpr extends ExprNode {
         super(line);
     }
 
-    @Override public String prettyPrint(String identation) {
+    @Override public String prettyString(String identation) {
         return identation + "FalseExpr";
     }
 

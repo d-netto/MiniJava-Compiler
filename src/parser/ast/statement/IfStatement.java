@@ -1,7 +1,7 @@
 package parser.ast.statement;
 
-import parser.ast.interfaces.ExprNode;
-import parser.ast.interfaces.StatementNode;
+import parser.ast.base_abs_classes.ExprNode;
+import parser.ast.base_abs_classes.StatementNode;
 import semantics.TypesVisitor;
 
 public class IfStatement extends StatementNode {
@@ -29,9 +29,9 @@ public class IfStatement extends StatementNode {
         return elseBlock;
     }
 
-    @Override public String prettyPrint(String identation) {
-        return identation + "IfStatement:" + "\n" + ifCondition.prettyPrint(identation + "\t") + "\n"
-                + ifBlock.prettyPrint(identation + "\t") + "\n" + elseBlock.prettyPrint(identation + "\t");
+    @Override public String prettyString(String identation) {
+        return identation + "IfStatement:" + "\n" + ifCondition.prettyString(identation + "\t") + "\n"
+                + ifBlock.prettyString(identation + "\t") + "\n" + elseBlock.prettyString(identation + "\t");
     }
 
     public void accept(TypesVisitor vis) {

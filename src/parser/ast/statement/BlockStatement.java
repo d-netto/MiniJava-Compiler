@@ -3,7 +3,7 @@ package parser.ast.statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import parser.ast.interfaces.StatementNode;
+import parser.ast.base_abs_classes.StatementNode;
 import semantics.TypesVisitor;
 
 public class BlockStatement extends StatementNode {
@@ -19,10 +19,10 @@ public class BlockStatement extends StatementNode {
         return new ArrayList<>(statements);
     }
 
-    @Override public String prettyPrint(String identation) {
+    @Override public String prettyString(String identation) {
         StringBuilder strBuilder = new StringBuilder("BlockStatement:");
         for (StatementNode statement : statements) {
-            strBuilder.append(statement.prettyPrint(identation + "\t"));
+            strBuilder.append(statement.prettyString(identation + "\t"));
         }
         return identation + strBuilder.toString();
     }

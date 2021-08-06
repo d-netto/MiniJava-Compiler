@@ -1,4 +1,4 @@
-package parser.ast.interfaces;
+package parser.ast.base_abs_classes;
 
 import semantics.TypesVisitor;
 import semantics.types.Type;
@@ -15,7 +15,7 @@ public abstract class ExprNode {
         return line;
     }
 
-    public abstract String prettyPrint(String string);
+    public abstract String prettyString(String string);
 
     public abstract Type accept(TypesVisitor vis);
 

@@ -1,6 +1,6 @@
 package parser.ast.expression.binary_expr;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
@@ -10,9 +10,9 @@ public class AndExpr extends BinaryExpr {
         super(line, leftHandSide, rightHandSide);
     }
 
-    @Override public String prettyPrint(String identation) {
-        return identation + "AndExpr:" + "\n" + leftHandSide.prettyPrint(identation + "\t") + "\n"
-                + rightHandSide.prettyPrint(identation + "\t");
+    @Override public String prettyString(String identation) {
+        return identation + "AndExpr:" + "\n" + leftHandSide.prettyString(identation + "\t") + "\n"
+                + rightHandSide.prettyString(identation + "\t");
     }
 
     @Override public Type accept(TypesVisitor vis) {

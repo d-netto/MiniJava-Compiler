@@ -1,6 +1,5 @@
 package parser.ast;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,21 +36,21 @@ public class ClassNode {
     }
 
     public List<VarDeclNode> getVarDecls() {
-        return new ArrayList<>(varDecls);
+        return varDecls;
     }
 
     public List<MethodDeclNode> getMethodDecls() {
-        return new ArrayList<>(methodDecls);
+        return methodDecls;
     }
 
-    public String prettyPrint(String identation) {
+    public String prettyString(String identation) {
         StringBuilder strBuilder = new StringBuilder(
                 "ClassNode:" + "\n" + identation + "\t" + (extendsFrom.isPresent() ? extendsFrom.get() : ""));
         for (VarDeclNode varDecl : varDecls) {
-            strBuilder.append("\n" + varDecl.prettyPrint(identation + "\t"));
+            strBuilder.append("\n" + varDecl.prettyString(identation + "\t"));
         }
         for (MethodDeclNode methodDecl : methodDecls) {
-            strBuilder.append("\n" + methodDecl.prettyPrint(identation + "\t"));
+            strBuilder.append("\n" + methodDecl.prettyString(identation + "\t"));
         }
         return identation + strBuilder.toString();
     }

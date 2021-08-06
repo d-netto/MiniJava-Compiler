@@ -1,6 +1,6 @@
 package parser.ast.expression;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
@@ -17,8 +17,8 @@ public class NotExpr extends ExprNode {
         return argument;
     }
 
-    @Override public String prettyPrint(String identation) {
-        return identation + "NotExpr:" + "\n" + argument.prettyPrint(identation + "\t");
+    @Override public String prettyString(String identation) {
+        return identation + "NotExpr:" + "\n" + argument.prettyString(identation + "\t");
     }
 
     @Override public Type accept(TypesVisitor vis) {

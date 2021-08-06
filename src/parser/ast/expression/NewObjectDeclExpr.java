@@ -1,6 +1,6 @@
 package parser.ast.expression;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
@@ -17,7 +17,7 @@ public class NewObjectDeclExpr extends ExprNode {
         return objName;
     }
 
-    @Override public String prettyPrint(String identation) {
+    @Override public String prettyString(String identation) {
         return identation + "NewObjectDeclExpr:" + "\n" + identation + "\t" + objName;
     }
 

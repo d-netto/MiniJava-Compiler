@@ -1,4 +1,4 @@
-package parser.ast.interfaces;
+package parser.ast.base_abs_classes;
 
 import semantics.TypesVisitor;
 
@@ -14,7 +14,7 @@ public abstract class StatementNode {
         return line;
     }
 
-    public abstract String prettyPrint(String string);
+    public abstract String prettyString(String string);
 
     public abstract void accept(TypesVisitor vis);
 

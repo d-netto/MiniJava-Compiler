@@ -1,7 +1,7 @@
 package parser.ast.statement;
 
-import parser.ast.interfaces.ExprNode;
-import parser.ast.interfaces.StatementNode;
+import parser.ast.base_abs_classes.ExprNode;
+import parser.ast.base_abs_classes.StatementNode;
 import semantics.TypesVisitor;
 
 public class SetVariableStatement extends StatementNode {
@@ -23,9 +23,9 @@ public class SetVariableStatement extends StatementNode {
         return rightHandSide;
     }
 
-    @Override public String prettyPrint(String identation) {
+    @Override public String prettyString(String identation) {
         return identation + "SetVariableStatement:" + "\n" + identation + "\t" + varAssignedName + "\n"
-                + rightHandSide.prettyPrint(identation + "\t");
+                + rightHandSide.prettyString(identation + "\t");
     }
 
     public void accept(TypesVisitor vis) {

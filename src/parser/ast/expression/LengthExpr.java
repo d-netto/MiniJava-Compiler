@@ -1,6 +1,6 @@
 package parser.ast.expression;
 
-import parser.ast.interfaces.ExprNode;
+import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
@@ -17,8 +17,8 @@ public class LengthExpr extends ExprNode {
         return lenExpr;
     }
 
-    @Override public String prettyPrint(String identation) {
-        return identation + "LengthExpr:" + "\n" + lenExpr.prettyPrint(identation + "\t");
+    @Override public String prettyString(String identation) {
+        return identation + "LengthExpr:" + "\n" + lenExpr.prettyString(identation + "\t");
     }
 
     @Override public Type accept(TypesVisitor vis) {

@@ -1,11 +1,13 @@
 package semantics;
 
-import java.util.List;
+import java.util.Iterator;
 
 import parser.ast.ClassNode;
 import parser.ast.GoalNode;
 import parser.ast.MethodDeclNode;
 import parser.ast.VarDeclNode;
+import parser.ast.base_abs_classes.ExprNode;
+import parser.ast.base_abs_classes.StatementNode;
 import parser.ast.expression.ArrayAccessExpr;
 import parser.ast.expression.LengthExpr;
 import parser.ast.expression.MethodCallExpr;
@@ -23,8 +25,6 @@ import parser.ast.expression.literals.IntExpr;
 import parser.ast.expression.singletons.FalseExpr;
 import parser.ast.expression.singletons.ThisExpr;
 import parser.ast.expression.singletons.TrueExpr;
-import parser.ast.interfaces.ExprNode;
-import parser.ast.interfaces.StatementNode;
 import parser.ast.statement.BlockStatement;
 import parser.ast.statement.IfStatement;
 import parser.ast.statement.PrintStatement;
@@ -38,7 +38,7 @@ import semantics.types.Variable;
 import semantics.types.base_types.BooleanType;
 import semantics.types.base_types.IntArrayType;
 import semantics.types.base_types.IntType;
-import utils.Pair;
+import utils.VariableHolder;
 
 public class TypesVisitor {
 
@@ -57,9 +57,9 @@ public class TypesVisitor {
             if (currentMethod.getVarsDecl().containsKey(name)) {
                 return currentMethod.getVarsDecl().get(name);
             } else {
-                for (Pair<String, Variable> pair : currentMethod.getArguments()) {
-                    if (pair.first().equals(name)) {
-                        return pair.second();
+                for (VariableHolder varHolder : currentMethod.getArguments()) {
+                    if (varHolder.getVarName().equals(name)) {
+                        return varHolder.getVariable();
                     }
                 }
             }
@@ -190,13 +190,11 @@ public class TypesVisitor {
     public Type visit(MethodCallExpr expr) {
         Type method = expr.getMethodNameExpr().accept(this);
         assert method.isMethodType() : "Internal error in DotExpr";
-        List<ExprNode> argListForExpr = expr.getArgs();
-        List<Pair<String, Variable>> args = ((MethodType) method).getArguments();
-        assert argListForExpr.size() == args.size() : String
-                .format("Number of arguments mismatch in method call in line", expr.getLine());
-        for (int i = 0; i < argListForExpr.size(); i++) {
-            Type argSigType = args.get(i).second().getType();
-            Type argCallType = argListForExpr.get(i).accept(this);
+        Iterator<ExprNode> argListForExprIter = expr.getArgs().iterator();
+        Iterator<VariableHolder> argListIter = ((MethodType) method).getArguments().iterator();
+        while (argListForExprIter.hasNext()) {
+            Type argCallType = argListForExprIter.next().accept(this);
+            Type argSigType = argListIter.next().getVariable().getType();
             if (argSigType.isClassType()) {
                 assert argCallType.isClassType() : String
                         .format("Argument type in function call in line %d should be a class", expr.getLine());
@@ -207,6 +205,8 @@ public class TypesVisitor {
                         expr.getLine());
             }
         }
+        assert !(argListIter.hasNext()) : String.format("Number of arguments mismatch in method call in line",
+                expr.getLine());
         return ((MethodType) method).getReturnType();
     }
 

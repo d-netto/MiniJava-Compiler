@@ -29,18 +29,6 @@ public class ClassType extends Type {
         return methods;
     }
 
-    public void setExtendsFrom(Optional<ClassType> otherExtendsFrom) {
-        extendsFrom = otherExtendsFrom;
-    }
-
-    public void setFields(Map<String, Variable> otherFields) {
-        fields = otherFields;
-    }
-
-    public void setMethods(Map<String, MethodType> otherMethods) {
-        methods = otherMethods;
-    }
-
     public List<ClassType> getAllParents() {
         List<ClassType> allParents = new ArrayList<>(List.of(this));
         ClassType currentClass = this;
@@ -54,6 +42,18 @@ public class ClassType extends Type {
 
     public boolean containsClassAsParent(ClassType otherClassType) {
         return getAllParents().contains(otherClassType);
+    }
+
+    public void setExtendsFrom(Optional<ClassType> otherExtendsFrom) {
+        extendsFrom = otherExtendsFrom;
+    }
+
+    public void setFields(Map<String, Variable> otherFields) {
+        fields = otherFields;
+    }
+
+    public void setMethods(Map<String, MethodType> otherMethods) {
+        methods = otherMethods;
     }
 
     @Override public boolean isClassType() {

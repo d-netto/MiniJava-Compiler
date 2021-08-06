@@ -28,10 +28,6 @@ public class MethodType extends Type {
         return returnType.hashCode() + arguments.hashCode() + varsDecl.hashCode();
     }
 
-    @Override public boolean isMethodType() {
-        return true;
-    }
-
     public Type getReturnType() {
         return returnType;
     }
@@ -42,6 +38,10 @@ public class MethodType extends Type {
 
     public Map<String, Variable> getVarsDecl() {
         return varsDecl;
+    }
+
+    @Override public boolean isMethodType() {
+        return true;
     }
 
 }

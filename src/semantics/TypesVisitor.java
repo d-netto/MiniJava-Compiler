@@ -42,9 +42,9 @@ import utils.VariableHolder;
 
 public class TypesVisitor {
 
-    protected Optional<ClassType> currentClass;
-    protected Optional<MethodType> currentMethod;
-    protected BuilderVisitor builderVis;
+    private Optional<ClassType> currentClass;
+    private Optional<MethodType> currentMethod;
+    private BuilderVisitor builderVis;
 
     public TypesVisitor(BuilderVisitor builderVis) {
         this.currentClass = Optional.empty();
@@ -52,7 +52,7 @@ public class TypesVisitor {
         this.builderVis = builderVis;
     }
 
-    private Type getVar(String name, int line) {
+    private Type getVarType(String name, int line) {
         if (currentMethod.isPresent()) {
             if (currentMethod.get().getVarsDecl().containsKey(name)) {
                 return currentMethod.get().getVarsDecl().get(name);
@@ -91,7 +91,7 @@ public class TypesVisitor {
     }
 
     public Type visit(IdentifierExpr expr) {
-        return getVar(expr.getIdentifierName(), expr.getLine());
+        return getVarType(expr.getIdentifierName(), expr.getLine());
     }
 
     public Type visit(IntExpr expr) {
@@ -233,7 +233,7 @@ public class TypesVisitor {
     }
 
     public void visit(SetArrayIndexStatement statement) {
-        Type arrayVariable = getVar(statement.getVarAssignedName(), statement.getLine());
+        Type arrayVariable = getVarType(statement.getVarAssignedName(), statement.getLine());
         assert arrayVariable.isIntArrayType() : String.format("Type mismatch in line %d", statement.getLine());
         assert statement.getIndex().accept(this).isIntType() : String.format("Type mismatch in line %d",
                 statement.getLine());
@@ -242,7 +242,7 @@ public class TypesVisitor {
     }
 
     public void visit(SetVariableStatement statement) {
-        Type variableType = getVar(statement.getVarAssignedName(), statement.getLine());
+        Type variableType = getVarType(statement.getVarAssignedName(), statement.getLine());
         Type rightHandSideType = statement.getRightHandSide().accept(this);
         if (variableType.isClassType()) {
             assert rightHandSideType.isClassType() : String

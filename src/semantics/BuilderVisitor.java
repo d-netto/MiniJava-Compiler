@@ -113,7 +113,8 @@ public class BuilderVisitor {
                     assert methodFromParent.getReturnType().equals(currentMethod.getReturnType()) : String.format(
                             "Overwritten method in %d should have the same return type as the method in parent class",
                             node.getLine());
-                    Iterator<VariableHolder> argumentsCurrentMethodIter = currentMethod.getArguments().iterator();
+                    Iterator<VariableHolder> argumentsCurrentMethodIter = currentMethod.getArguments()
+                            .iterator();
                     Iterator<VariableHolder> argumentsMethodFromParentIter = methodFromParent.getArguments().iterator();
                     while (argumentsCurrentMethodIter.hasNext()) {
                         assert argumentsCurrentMethodIter.next().getType()

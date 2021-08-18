@@ -42,9 +42,9 @@ import utils.VariableHolder;
 
 public class TypesVisitor {
 
-    private Optional<ClassType> currentClass;
-    private Optional<MethodType> currentMethod;
-    private BuilderVisitor builderVis;
+    protected Optional<ClassType> currentClass;
+    protected Optional<MethodType> currentMethod;
+    protected BuilderVisitor builderVis;
 
     public TypesVisitor(BuilderVisitor builderVis) {
         this.currentClass = Optional.empty();
@@ -72,6 +72,22 @@ public class TypesVisitor {
             }
         }
         throw new AssertionError(String.format("Type \"%s\" used in line %d was not defined", name, line));
+    }
+
+    private void setCurrentClass(ClassNode node) {
+        currentClass = Optional.of(builderVis.getClassType(node.getClassName(), node.getLine()));
+    }
+
+    private void setCurrentMethod(MethodDeclNode node) {
+        for (ClassType classType : currentClass.get().getAllParents()) {
+            if (classType.getMethods().containsKey(node.getMethodName())) {
+                currentMethod = Optional.of(classType.getMethods().get(node.getMethodName()));
+                return;
+            }
+        }
+        throw new AssertionError(
+                String.format("Method \"%s\" used in line %d was not defined in its class or parent classes",
+                        node.getMethodName(), node.getLine()));
     }
 
     public Type visit(IdentifierExpr expr) {
@@ -246,7 +262,7 @@ public class TypesVisitor {
     }
 
     public void visit(ClassNode node) {
-        currentClass = Optional.of(builderVis.getClassType(node.getClassName(), node.getLine()));
+        setCurrentClass(node);
         for (VarDeclNode varDecl : node.getVarDecls()) {
             varDecl.accept(this);
         }
@@ -263,7 +279,7 @@ public class TypesVisitor {
     }
 
     public void visit(MethodDeclNode node) {
-        currentMethod = Optional.of(currentClass.get().getMethods().get(node.getMethodName()));
+        setCurrentMethod(node);
         for (VarDeclNode varDecl : node.getVarDecls()) {
             varDecl.accept(this);
         }

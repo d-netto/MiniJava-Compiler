@@ -1,6 +1,7 @@
 package semantics;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import parser.ast.ClassNode;
 import parser.ast.GoalNode;
@@ -41,30 +42,30 @@ import utils.VariableHolder;
 
 public class TypesVisitor {
 
-    private ClassType currentClass;
-    private MethodType currentMethod;
+    private Optional<ClassType> currentClass;
+    private Optional<MethodType> currentMethod;
     private BuilderVisitor builderVis;
 
     public TypesVisitor(BuilderVisitor builderVis) {
-        this.currentClass = null;
-        this.currentMethod = null;
+        this.currentClass = Optional.empty();
+        this.currentMethod = Optional.empty();
         this.builderVis = builderVis;
     }
 
     private Type getVar(String name, int line) {
-        if (currentMethod != null) {
-            if (currentMethod.getVarsDecl().containsKey(name)) {
-                return currentMethod.getVarsDecl().get(name);
+        if (currentMethod.isPresent()) {
+            if (currentMethod.get().getVarsDecl().containsKey(name)) {
+                return currentMethod.get().getVarsDecl().get(name);
             } else {
-                for (VariableHolder varHolder : currentMethod.getArguments()) {
+                for (VariableHolder varHolder : currentMethod.get().getArguments()) {
                     if (varHolder.getVarName().equals(name)) {
                         return varHolder.getType();
                     }
                 }
             }
         }
-        if (currentClass != null) {
-            for (ClassType classType : currentClass.getAllParents()) {
+        if (currentClass.isPresent()) {
+            for (ClassType classType : currentClass.get().getAllParents()) {
                 if (classType.getFields().containsKey(name)) {
                     return classType.getFields().get(name);
                 }
@@ -90,7 +91,7 @@ public class TypesVisitor {
     }
 
     public Type visit(ThisExpr expr) {
-        return currentClass;
+        return currentClass.get();
     }
 
     public Type visit(AddExpr expr) {
@@ -245,7 +246,7 @@ public class TypesVisitor {
     }
 
     public void visit(ClassNode node) {
-        currentClass = builderVis.getClassType(node.getClassName(), node.getLine());
+        currentClass = Optional.of(builderVis.getClassType(node.getClassName(), node.getLine()));
         for (VarDeclNode varDecl : node.getVarDecls()) {
             varDecl.accept(this);
         }
@@ -262,7 +263,7 @@ public class TypesVisitor {
     }
 
     public void visit(MethodDeclNode node) {
-        currentMethod = currentClass.getMethods().get(node.getMethodName());
+        currentMethod = Optional.of(currentClass.get().getMethods().get(node.getMethodName()));
         for (VarDeclNode varDecl : node.getVarDecls()) {
             varDecl.accept(this);
         }

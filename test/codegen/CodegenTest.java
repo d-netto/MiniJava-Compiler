@@ -20,7 +20,7 @@ public class CodegenTest {
 
     @Test public void TestClassOtherThanMain() throws IOException {
         String simpleProgram = "class Main {\n" + "public static void main(String[] args) {\n"
-                + "System.out.println(4);\n" + "}\n" + "}\n" + "\n" + "class Foo {\n" + "int bar;\n"
+                + "System.out.println(2)\n;" + "}\n" + "}\n" + "\n" + "class Foo {\n" + "int bar;\n"
                 + "public int baz() {\n" + "return 2;\n" + "}\n" + "}\n";
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));

@@ -196,7 +196,7 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(ThisExpr expr) {
-        functionsRegion.append("\n\t" + "movq -8(%%rbp), %%rax");
+        functionsRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", BYTE_SIZE));
     }
 
     public void visit(AddExpr expr) {
@@ -308,10 +308,12 @@ public class SimpleCodegenVisitor {
                     .get(findFirst(currentVTable, elt -> elt.second().equals(methodDeclNode.getMethodName())));
             preamble.append(String.format("\n\t" + ".quad %s$%s", methodPair.first(), methodPair.second()));
             if (!(methodsAlreadyWritten.contains(methodPair))) {
+                functionsRegion.append("\n\n" + methodPair.toString() + ":");
                 methodDeclNode.accept(this);
                 methodsAlreadyWritten.add(methodPair);
             }
         }
+        preamble.append("\n\t" + ".align 16");
     }
 
     public void visit(GoalNode node) {
@@ -326,16 +328,19 @@ public class SimpleCodegenVisitor {
 
     public void visit(MethodDeclNode node) {
         setCurrentMethod(node);
-        functionsRegion.append("\n\n" + node.getMethodName() + ":");
         functionsRegion.append("\n\t" + "pushq %rbp");
         functionsRegion.append("\n\t" + "movq %rsp, %rbp");
         int stackAllocBytes = 1 + currentMethod.get().getArgumentsSorted().size()
                 + currentMethod.get().getVarsDeclSorted().size();
-        functionsRegion.append("\n\t" + String.format("subq $%d, %%rsp", stackAllocBytes));
-        int numberOfArgs = node.getMethodArgs().size();
+        if (stackAllocBytes % 2 == 1) {
+            stackAllocBytes += 1;
+        }
+        functionsRegion.append("\n\t" + String.format("subq $%d, %%rsp", BYTE_SIZE * stackAllocBytes));
+        int numberOfArgs = node.getMethodArgs().size() + 1;
         assert numberOfArgs <= REGISTERS.size() : "Current implementation doesn't support more than 6 arguments";
         for (int i = 0; i < numberOfArgs; ++i) {
-            functionsRegion.append("\n\t" + REGISTERS.get(i));
+            functionsRegion
+                    .append("\n\t" + String.format("movq %s, -%d(%%rbp)", REGISTERS.get(i), BYTE_SIZE * (i + 1)));
         }
         for (StatementNode statementNode : node.getStatements()) {
             statementNode.accept(this);

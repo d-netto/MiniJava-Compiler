@@ -29,9 +29,10 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
-        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
-        goal.accept(codegenVis);
-        System.out.println(codegenVis.getDataRegion() + "\n" + codegenVis.getTextRegion());
+        // SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        // goal.accept(codegenVis);
+        // System.out.println(codegenVis.getDataRegion() + "\n" +
+        // codegenVis.getTextRegion());
     }
 
     // All of the following test files were taken form
@@ -84,6 +85,9 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        goal.accept(codegenVis);
+        System.out.println(codegenVis.getDataRegion() + "\n" + codegenVis.getTextRegion());
     }
 
     @Test public void TestLinear() throws IOException {

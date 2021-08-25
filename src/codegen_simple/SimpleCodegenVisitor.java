@@ -105,8 +105,7 @@ public class SimpleCodegenVisitor {
 
     }
 
-    // TODO: use this to count the label indices when implementing short-circuit
-    // private int blockNumber;
+    private int currentBlockNumber;
     private StringBuilder dataRegion;
     private StringBuilder textRegion;
     private Set<Pair<String, String>> methodsAlreadyWritten;
@@ -114,7 +113,7 @@ public class SimpleCodegenVisitor {
     private TypesVisitor typesVis;
 
     public SimpleCodegenVisitor(TypesVisitor typesVis) {
-        // blockNumber = 0;
+        currentBlockNumber = 0;
         dataRegion = new StringBuilder();
         textRegion = new StringBuilder();
         methodsAlreadyWritten = new HashSet<>();
@@ -149,6 +148,42 @@ public class SimpleCodegenVisitor {
         return typesVis.getCurrentMethod();
     }
 
+    private void getVarAddress(String varName) {
+        Optional<ClassType> currentClass = getCurrentClass();
+        Optional<MethodType> currentMethod = getCurrentMethod();
+        if (currentClass.isPresent()) {
+            // case 1: function argument
+            int argumentIndex = findFirst(currentMethod.get().getArgumentsSorted(), elt -> elt.first().equals(varName));
+            if (currentMethod.get().getArguments().containsKey(varName)) {
+                int offset = BYTE_SIZE * (2 + argumentIndex);
+                textRegion.append("\n\t" + String.format("leaq -%d(%%rbp), %%rax", offset));
+                return;
+            }
+            // case 2: variable declared in function scope
+            int varDeclIndex = findFirst(currentMethod.get().getVarsDeclSorted(), elt -> elt.first().equals(varName));
+            if (varDeclIndex != -1) {
+                int offset = BYTE_SIZE * (2 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
+                textRegion.append("\n\t" + String.format("leaq -%d(%%rbp), %%rax", offset));
+                return;
+            }
+        }
+        // case 3: object field
+        if (currentClass.isPresent()) {
+            int fieldIndex = findFirst(objsLayout.get(currentClass.get().getClassName()).getFields(),
+                    elt -> elt.equals(varName));
+            if (fieldIndex != -1) {
+                int offset = BYTE_SIZE * fieldIndex;
+                // "this" is stored in -8(%rbp) --> move it to %rax
+                textRegion.append("\n\t" + String.format("leaq -%d(%%rax), %%rax", BYTE_SIZE));
+                // get the corresponding field in "this" and move it to %rax
+                textRegion.append("\n\t" + String.format("addq $-%d, %%rax", offset));
+                return;
+            }
+
+        }
+        throw new AssertionError("This should have failed semantic checks");
+    }
+
     public void visit(IdentifierExpr expr) {
         String idName = expr.getIdentifierName();
         Optional<ClassType> currentClass = getCurrentClass();
@@ -157,14 +192,14 @@ public class SimpleCodegenVisitor {
             // case 1: function argument
             int argumentIndex = findFirst(currentMethod.get().getArgumentsSorted(), elt -> elt.first().equals(idName));
             if (currentMethod.get().getArguments().containsKey(idName)) {
-                int offset = BYTE_SIZE * (1 + argumentIndex);
+                int offset = BYTE_SIZE * (2 + argumentIndex);
                 textRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", offset));
                 return;
             }
             // case 2: variable declared in function scope
             int varDeclIndex = findFirst(currentMethod.get().getVarsDeclSorted(), elt -> elt.first().equals(idName));
             if (varDeclIndex != -1) {
-                int offset = BYTE_SIZE * (1 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
+                int offset = BYTE_SIZE * (2 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
                 textRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", offset));
                 return;
             }
@@ -179,8 +214,8 @@ public class SimpleCodegenVisitor {
                 textRegion.append("\n\t" + String.format("movq -%d(%%rax), %%rax", BYTE_SIZE));
                 // get the corresponding field in "this" and move it to %rax
                 textRegion.append("\n\t" + String.format("movq -%d(%%rax), %%rax", offset));
+                return;
             }
-            return;
 
         }
         throw new AssertionError("This should have failed semantic checks");
@@ -203,14 +238,22 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(AddExpr expr) {
-        expr.getRightHandSide().accept(this);
-        textRegion.append("\n\t" + "movq %rax, %rdx");
         expr.getLeftHandSide().accept(this);
+        // push into the stack
+        textRegion.append("\n\t" + "pushq %rax");
+        expr.getRightHandSide().accept(this);
+        // retrieve LHS from stack
+        textRegion.append("\n\t" + "popq %rdx");
         textRegion.append("\n\t" + "addq %rdx, %%rax");
     }
 
     public void visit(AndExpr expr) {
-        // NOTE: implement short circuit
+        expr.getLeftHandSide().accept(this);
+        textRegion.append("\n\t" + "test %rax, %rax");
+        int continuationNumberCache = ++currentBlockNumber;
+        textRegion.append("\n\t" + String.format("jz block$%d:", continuationNumberCache));
+        expr.getRightHandSide().accept(this);
+        textRegion.append("\n" + String.format("block$%d:", continuationNumberCache));
     }
 
     public void visit(DotExpr expr) {
@@ -227,30 +270,49 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(LtExpr expr) {
+        expr.getLeftHandSide().accept(this);
+        // push into the stack
+        textRegion.append("\n\t" + "pushq %rax");
+        expr.getRightHandSide().accept(this);
+        // retrieve LHS from stack
+        textRegion.append("\n\t" + "popq %rdx");
+        textRegion.append("\n\t" + "cmpq %rax, %rdx");
+        textRegion.append("\n\t" + "setl %al");
+        textRegion.append("\n\t" + "movzbq %al, %rax");
     }
 
     public void visit(MultExpr expr) {
-        expr.getRightHandSide().accept(this);
-        textRegion.append("\n\t" + "movq %rax, %rdx");
         expr.getLeftHandSide().accept(this);
-        textRegion.append("\n\t" + "mulq %rdx, %rax");
+        // push into the stack
+        textRegion.append("\n\t" + "pushq %rax");
+        expr.getRightHandSide().accept(this);
+        // retrieve LHS from stack
+        textRegion.append("\n\t" + "popq %rdx");
+        textRegion.append("\n\t" + "mulq %rdx");
     }
 
     public void visit(SubExpr expr) {
+        // more efficient to compute in this order...
         expr.getRightHandSide().accept(this);
-        textRegion.append("\n\t" + "movq %rax, %rdx");
+        // push into the stack
+        textRegion.append("\n\t" + "pushq %rax");
+        // and then store LHS on %rax
         expr.getLeftHandSide().accept(this);
+        // retrieve RHS from stack
+        textRegion.append("\n\t" + "popq %rdx");
         textRegion.append("\n\t" + "subq %rdx, %rax");
     }
 
     public void visit(ArrayAccessExpr expr) {
         // get the array reference (which will be in %rax)
         expr.getArray().accept(this);
-        // move it to %rdx
-        textRegion.append("\n\t" + "movq %rax, %rdx");
+        // push into the stack
+        textRegion.append("\n\t" + "pushq %rax");
         expr.getIndex().accept(this);
         // zeroth element of the array stores its length, so increment index by one
         textRegion.append("\n\t" + "incq %rax");
+        // retrieve array pointer from stack
+        textRegion.append("\n\t" + "popq %rdx");
         // dereference pointer to array element and move it to %rax
         textRegion.append("\n\t" + "movq (%rdx, %rax, -8), %rax");
     }
@@ -267,15 +329,13 @@ public class SimpleCodegenVisitor {
         List<ExprNode> args = expr.getArgs();
         assert args.size() + 1 <= ARGUMENT_REGISTERS
                 .size() : "Current implementation doesn't support more than 6 arguments";
-        for (int i = 0; i < args.size(); ++i) {
-            args.get(i).accept(this);
-            textRegion.append("\n\t" + String.format("movq %%rax, %s", ARGUMENT_REGISTERS.get(i)));
-        }
         // get pointer to object on which the method is being called
         expr.getObjectSeqExpr().accept(this);
+        // push it to stack
+        textRegion.append("\n\t" + "pushq %rax");
         // dereference pointer to base of vTable and move it to %rax
         textRegion.append("\n\t" + "movq 0(%rax), %rax");
-        // this is safe (doesn't change typesVis' currentClass/Method) because
+        // the following is safe (doesn't change typesVis' currentClass/Method) because
         // MethodCallExpr doesn't visit a ClassNode or MethodDeclNode
         Type objType = expr.getObjectSeqExpr().accept(typesVis);
         assert objType.isClassType() : "This should have failed semantic checks";
@@ -283,12 +343,27 @@ public class SimpleCodegenVisitor {
                 elt -> elt.second().equals(expr.getMethodNameExpr().getIdentifierName()));
         assert methodIndex != -1 : "This should have failed semantic checks";
         textRegion.append("\n\t" + String.format("movq %d(%%rax), %%rax", BYTE_SIZE * (methodIndex + 1)));
+        // %rax now stores function pointer: push it to stack
+        textRegion.append("\n\t" + "pushq %rax");
+        // push args into the stack
+        for (ExprNode arg : args) {
+            arg.accept(this);
+            textRegion.append("\n\t" + "pushq %rax");
+        }
+        // pop arguments
+        for (int i = 0; i < args.size(); ++i) {
+            textRegion.append("\n\t" + String.format("popq %s", ARGUMENT_REGISTERS.get(args.size() - i)));
+        }
+        // pop pointer to function
+        textRegion.append("\n\t" + "popq %rax");
+        // pop pointer to object on which the method is being called
+        textRegion.append("\n\t" + "popq %rdi");
         textRegion.append("\n\t" + "call *%rax");
 
     }
 
     public void visit(NewArrayDeclExpr expr) {
-        // %rax contains the array size
+        // %rax will contain the array size
         expr.getSize().accept(this);
         // callee saved register to hold the length
         textRegion.append("\n\t" + "movq %rax, %r12");
@@ -305,7 +380,7 @@ public class SimpleCodegenVisitor {
     public void visit(NewObjectDeclExpr expr) {
         String objectName = expr.getObjectName();
         int numBytes = objsLayout.get(objectName).getFields().size() + 1;
-        textRegion.append("\n\t" + String.format("movq $%d, %%rdi", BYTE_SIZE * numBytes));
+        textRegion.append("\n\t" + String.format("movq $%d, %%rdi", numBytes));
         textRegion.append("\n\t" + "movq $8, %rsi");
         textRegion.append("\n\t" + "call calloc");
         textRegion.append("\n\t" + String.format("leaq %s, %%rdx", objectName + "$$"));
@@ -323,6 +398,16 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(IfStatement statement) {
+        statement.getIfCondition().accept(this);
+        int elseBlockCache = ++currentBlockNumber;
+        textRegion.append("\n\t" + "test %rax, %rax");
+        textRegion.append("\n\t" + String.format("jz block$%d", elseBlockCache));
+        statement.getIfBlock().accept(this);
+        int loopExitCache = ++currentBlockNumber;
+        textRegion.append("\n\t" + String.format("jmp block$%d", loopExitCache));
+        textRegion.append("\n" + String.format("block$%d:", elseBlockCache));
+        statement.getElseBlock().accept(this);
+        textRegion.append("\n" + String.format("block$%d:", loopExitCache));
     }
 
     public void visit(PrintStatement statement) {
@@ -333,9 +418,36 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(SetArrayIndexStatement statement) {
+        // %rax will contain the address of the array base
+        getVarAddress(statement.getVarAssignedName());
+        // push pointer to stack
+        textRegion.append("\n\t" + "pushq %rax");
+        // compute index and increment by one (zeroth element stores size)
+        statement.getIndex().accept(this);
+        textRegion.append("\n\t" + "incq %rax");
+        // push it to stack
+        textRegion.append("\n\t" + "pushq %rax");
+        // compute RHS which will be stored in %rax
+        statement.getRightHandSide().accept(this);
+        // pop index into %r12
+        textRegion.append("\n\t" + "popq %r12");
+        // pop array pointer into %rdx
+        textRegion.append("\n\t" + "popq %rdx");
+        // move RHS into appropriate array slot
+        textRegion.append("\n\t" + "movq %rax, (%rdx, %r12, -8)");
     }
 
     public void visit(SetVariableStatement statement) {
+        // %rax will contain the address of the variable
+        getVarAddress(statement.getVarAssignedName());
+        // push pointer to stack
+        textRegion.append("\n\t" + "pushq %rax");
+        // compute RHS which will be stored in %rax
+        statement.getRightHandSide().accept(this);
+        // pop pointer to variable into %rdx
+        textRegion.append("\n\t" + "popq %rdx");
+        // move RHS into appropriate array slot
+        textRegion.append("\n\t" + "movq %rax, (%rdx)");
     }
 
     public void visit(WhileStatement statement) {
@@ -389,7 +501,7 @@ public class SimpleCodegenVisitor {
         Optional<MethodType> currentMethod = getCurrentMethod();
         textRegion.append("\n\t" + "pushq %rbp");
         textRegion.append("\n\t" + "movq %rsp, %rbp");
-        int stackAllocBytes = 1 + currentMethod.get().getArgumentsSorted().size()
+        int stackAllocBytes = 2 + currentMethod.get().getArgumentsSorted().size()
                 + currentMethod.get().getVarsDeclSorted().size();
         // stack needs to be 16 aligned before calling printf, calloc, etc.
         if (stackAllocBytes % 2 == 1) {
@@ -420,8 +532,8 @@ public class SimpleCodegenVisitor {
         int varDeclIndex = findFirst(currentMethod.get().getVarsDeclSorted(),
                 elt -> elt.first().equals(node.getVarName()));
         assert varDeclIndex != -1 : "This should have failed semantic checks";
-        int offset = BYTE_SIZE * (1 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
-        textRegion.append(String.format("movq $0, -%d(%%rbp)", offset));
+        int offset = BYTE_SIZE * (2 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
+        textRegion.append(String.format("\n\t" + "movq $0, -%d(%%rbp)", offset));
     }
 
 }

@@ -1,8 +1,8 @@
 package parser.ast;
 
 import java.util.List;
-import java.util.Map;
 
+import codegen_simple.SimpleCodegenVisitor;
 import parser.ast.base_abs_classes.ExprNode;
 import parser.ast.base_abs_classes.StatementNode;
 import semantics.BuilderVisitor;
@@ -75,11 +75,15 @@ public class MethodDeclNode {
         return identation + strBuilder.toString();
     }
 
-    public void accept(BuilderVisitor vis, Map<String, MethodType> fields) {
-        vis.visit(this, fields);
+    public Pair<String, MethodType> accept(BuilderVisitor vis) {
+        return vis.visit(this);
     }
 
     public void accept(TypesVisitor vis) {
+        vis.visit(this);
+    }
+
+    public void accept(SimpleCodegenVisitor vis) {
         vis.visit(this);
     }
 

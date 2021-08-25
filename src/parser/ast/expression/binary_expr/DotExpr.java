@@ -1,13 +1,28 @@
 package parser.ast.expression.binary_expr;
 
+import codegen_simple.SimpleCodegenVisitor;
 import parser.ast.base_abs_classes.ExprNode;
+import parser.ast.expression.literals.IdentifierExpr;
 import semantics.TypesVisitor;
 import semantics.types.Type;
 
-public class DotExpr extends BinaryExpr {
+public class DotExpr extends ExprNode {
 
-    public DotExpr(int line, ExprNode leftHandSide, ExprNode rightHandSide) {
-        super(line, leftHandSide, rightHandSide);
+    private ExprNode leftHandSide;
+    private IdentifierExpr rightHandSide;
+
+    public DotExpr(int line, ExprNode leftHandSide, IdentifierExpr rightHandSide) {
+        super(line);
+        this.leftHandSide = leftHandSide;
+        this.rightHandSide = rightHandSide;
+    }
+
+    public ExprNode getLeftHandSide() {
+        return leftHandSide;
+    }
+
+    public ExprNode getRightHandSide() {
+        return rightHandSide;
     }
 
     @Override public String prettyString(String identation) {
@@ -17,6 +32,10 @@ public class DotExpr extends BinaryExpr {
 
     @Override public Type accept(TypesVisitor vis) {
         return vis.visit(this);
+    }
+
+    @Override public void accept(SimpleCodegenVisitor vis) {
+        vis.visit(this);
     }
 
 }

@@ -38,7 +38,7 @@ import semantics.types.Type;
 import semantics.types.base_types.BooleanType;
 import semantics.types.base_types.IntArrayType;
 import semantics.types.base_types.IntType;
-import utils.VariableHolder;
+import utils.Pair;
 
 public class TypesVisitor {
 
@@ -56,12 +56,8 @@ public class TypesVisitor {
         if (currentMethod.isPresent()) {
             if (currentMethod.get().getVarsDecl().containsKey(name)) {
                 return currentMethod.get().getVarsDecl().get(name);
-            } else {
-                for (VariableHolder varHolder : currentMethod.get().getArguments()) {
-                    if (varHolder.getVarName().equals(name)) {
-                        return varHolder.getType();
-                    }
-                }
+            } else if (currentMethod.get().getArguments().containsKey(name)) {
+                return currentMethod.get().getArguments().get(name);
             }
         }
         if (currentClass.isPresent()) {
@@ -133,9 +129,9 @@ public class TypesVisitor {
         Type leftHandSideType = leftHandSide.accept(this);
         assert leftHandSideType.isClassType() : "Internal error in DotExpr";
         ClassType classType = (ClassType) leftHandSideType;
-        assert classType.getMethods().containsKey(rightHandSideName) : String
+        assert classType.getFields().containsKey(rightHandSideName) : String
                 .format("Method \"%s\" from line %d not defined in its class", rightHandSideName, expr.getLine());
-        return classType.getMethods().get(rightHandSideName);
+        return classType.getFields().get(rightHandSideName);
     }
 
     public Type visit(LtExpr expr) {
@@ -178,13 +174,24 @@ public class TypesVisitor {
     }
 
     public Type visit(MethodCallExpr expr) {
-        Type method = expr.getMethodNameExpr().accept(this);
-        assert method.isMethodType() : "Internal error in DotExpr";
+        Type objectSeqExpr = expr.getObjectSeqExpr().accept(this);
+        assert objectSeqExpr.isClassType() : String.format("Predicate defined in line %d doesn't define a class",
+                expr.getLine());
+        String methodName = expr.getMethodNameExpr().getIdentifierName();
+        Optional<MethodType> method = Optional.empty();
+        for (ClassType classType : ((ClassType) objectSeqExpr).getAllParents()) {
+            if (classType.getMethods().containsKey(methodName)) {
+                method = Optional.of(classType.getMethods().get(methodName));
+            }
+        }
+        assert method.isPresent() : String.format(
+                "Method \"%s\" used in line %d was not defined in its class or parent classes", methodName,
+                expr.getLine());
         Iterator<ExprNode> argListForExprIter = expr.getArgs().iterator();
-        Iterator<VariableHolder> argListIter = ((MethodType) method).getArguments().iterator();
+        Iterator<Pair<String, Type>> argListIter = method.get().getArgumentsSorted().iterator();
         while (argListForExprIter.hasNext()) {
             Type argCallType = argListForExprIter.next().accept(this);
-            Type argSigType = argListIter.next().getType();
+            Type argSigType = argListIter.next().second();
             if (argSigType.isClassType()) {
                 assert argCallType.isClassType() : String.format(
                         "Argument type in function call in line %d should be a non-primitive object", expr.getLine());
@@ -197,10 +204,11 @@ public class TypesVisitor {
         }
         assert !(argListIter.hasNext()) : String.format("Number of arguments mismatch in method call in line",
                 expr.getLine());
-        return ((MethodType) method).getReturnType();
+        return method.get().getReturnType();
     }
 
     public Type visit(NewArrayDeclExpr expr) {
+        // TODO: check if declared size is int
         return new IntArrayType();
     }
 

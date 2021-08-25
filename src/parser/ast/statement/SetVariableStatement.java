@@ -1,5 +1,6 @@
 package parser.ast.statement;
 
+import codegen_simple.SimpleCodegenVisitor;
 import parser.ast.base_abs_classes.ExprNode;
 import parser.ast.base_abs_classes.StatementNode;
 import semantics.TypesVisitor;
@@ -29,6 +30,10 @@ public class SetVariableStatement extends StatementNode {
     }
 
     @Override public void accept(TypesVisitor vis) {
+        vis.visit(this);
+    }
+
+    @Override public void accept(SimpleCodegenVisitor vis) {
         vis.visit(this);
     }
 

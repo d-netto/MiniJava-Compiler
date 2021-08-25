@@ -3,6 +3,7 @@ package parser.ast;
 import java.util.List;
 import java.util.Optional;
 
+import codegen_simple.SimpleCodegenVisitor;
 import semantics.BuilderVisitor;
 import semantics.TypesVisitor;
 
@@ -60,6 +61,10 @@ public class ClassNode {
     }
 
     public void accept(TypesVisitor vis) {
+        vis.visit(this);
+    }
+
+    public void accept(SimpleCodegenVisitor vis) {
         vis.visit(this);
     }
 

@@ -328,17 +328,18 @@ public class MJParser {
             break;
         case MJLexer.DOT:
             handleTokenTypeCheck(MJLexer.DOT);
-            Token nextToken = nextToken();
-            if (nextToken.getType() == MJLexer.LENGTH_KW) {
-                head = new LengthExpr(oneAhead.getLine(), head);
-            } else if (nextToken.getType() == MJLexer.ID) {
-                ExprNode fieldId = new IdentifierExpr(oneAhead.getLine(), nextToken.getText());
-                head = new DotExpr(oneAhead.getLine(), head, fieldId);
-                while (lookahead(1).getType() == MJLexer.DOT) {
+            if (lookahead(1).getType() == MJLexer.LENGTH_KW) {
+                head = new LengthExpr(handleTokenTypeCheck(MJLexer.LENGTH_KW).getLine(), head);
+            } else if (lookahead(1).getType() == MJLexer.ID) {
+                while (lookahead(2).getType() == MJLexer.DOT) {
+                    IdentifierExpr fieldId = new IdentifierExpr(lookahead(1).getLine(),
+                            handleTokenTypeCheck(MJLexer.ID).getText());
                     handleTokenTypeCheck(MJLexer.DOT);
-                    fieldId = new IdentifierExpr(oneAhead.getLine(), handleTokenTypeCheck(MJLexer.ID).getText());
                     head = new DotExpr(oneAhead.getLine(), head, fieldId);
                 }
+
+                IdentifierExpr methodName = new IdentifierExpr(lookahead(1).getLine(),
+                        handleTokenTypeCheck(MJLexer.ID).getText());
                 handleTokenTypeCheck(MJLexer.LPARENS);
                 List<ExprNode> args = new ArrayList<>();
                 if (!(lookahead(1).getType() == MJLexer.RPARENS)) {
@@ -349,7 +350,7 @@ public class MJParser {
                     }
                 }
                 handleTokenTypeCheck(MJLexer.RPARENS);
-                head = new MethodCallExpr(oneAhead.getLine(), head, args);
+                head = new MethodCallExpr(oneAhead.getLine(), head, methodName, args);
             } else {
                 throw new AssertionError(String.format(
                         "Failed while trying to parse expression of form \"A.B\" in line %d", oneAhead.getLine()));

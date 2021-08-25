@@ -3,6 +3,7 @@ package parser.ast.statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import codegen_simple.SimpleCodegenVisitor;
 import parser.ast.base_abs_classes.StatementNode;
 import semantics.TypesVisitor;
 
@@ -27,7 +28,11 @@ public class BlockStatement extends StatementNode {
         return identation + strBuilder.toString();
     }
 
-    public void accept(TypesVisitor vis) {
+    @Override public void accept(TypesVisitor vis) {
+        vis.visit(this);
+    }
+
+    @Override public void accept(SimpleCodegenVisitor vis) {
         vis.visit(this);
     }
 

@@ -1,20 +1,32 @@
 package semantics.types;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import utils.VariableHolder;
+import utils.Pair;
 
 public class MethodType extends Type {
 
     private final Type returnType;
-    private final List<VariableHolder> arguments;
+    private List<Pair<String, Type>> argumentsSorted;
+    private final Map<String, Type> arguments;
+    private List<Pair<String, Type>> varsDeclSorted;
     private final Map<String, Type> varsDecl;
 
-    public MethodType(Type returnType, List<VariableHolder> arguments, Map<String, Type> TypesDeclared) {
+    public MethodType(Type returnType, List<Pair<String, Type>> argumentsSorted,
+            List<Pair<String, Type>> varsDeclSorted) {
         this.returnType = returnType;
-        this.arguments = arguments;
-        this.varsDecl = TypesDeclared;
+        this.argumentsSorted = argumentsSorted;
+        arguments = new HashMap<>();
+        for (Pair<String, Type> fieldPair : argumentsSorted) {
+            arguments.put(fieldPair.first(), fieldPair.second());
+        }
+        this.varsDeclSorted = varsDeclSorted;
+        varsDecl = new HashMap<>();
+        for (Pair<String, Type> methodPair : varsDeclSorted) {
+            varsDecl.put(methodPair.first(), methodPair.second());
+        }
     }
 
     @Override public boolean equals(Object otherType) {
@@ -31,8 +43,16 @@ public class MethodType extends Type {
         return returnType;
     }
 
-    public List<VariableHolder> getArguments() {
+    public List<Pair<String, Type>> getArgumentsSorted() {
+        return argumentsSorted;
+    }
+
+    public Map<String, Type> getArguments() {
         return arguments;
+    }
+
+    public List<Pair<String, Type>> getVarsDeclSorted() {
+        return varsDeclSorted;
     }
 
     public Map<String, Type> getVarsDecl() {

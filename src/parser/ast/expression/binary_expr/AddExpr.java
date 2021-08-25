@@ -1,5 +1,6 @@
 package parser.ast.expression.binary_expr;
 
+import codegen_simple.SimpleCodegenVisitor;
 import parser.ast.base_abs_classes.ExprNode;
 import semantics.TypesVisitor;
 import semantics.types.Type;
@@ -17,6 +18,10 @@ public class AddExpr extends BinaryExpr {
 
     @Override public Type accept(TypesVisitor vis) {
         return vis.visit(this);
+    }
+
+    @Override public void accept(SimpleCodegenVisitor vis) {
+        vis.visit(this);
     }
 
 }

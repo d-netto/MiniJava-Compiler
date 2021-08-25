@@ -21,7 +21,6 @@ import semantics.types.base_types.IntArrayType;
 import semantics.types.base_types.IntType;
 import utils.ClassHolder;
 import utils.Pair;
-import utils.VariableHolder;
 
 public class BuilderVisitor {
 
@@ -44,7 +43,7 @@ public class BuilderVisitor {
         } else if (pendingClasses.containsKey(className)) {
             return pendingClasses.get(className).getClassType();
         } else {
-            ClassType pendingClass = new ClassType(Optional.empty(), new HashMap<>(), new HashMap<>());
+            ClassType pendingClass = new ClassType(className, Optional.empty(), new ArrayList<>(), new ArrayList<>());
             pendingClasses.put(className, new ClassHolder(line, pendingClass));
             classSymbolTable.put(className, pendingClass);
             return pendingClass;
@@ -69,6 +68,7 @@ public class BuilderVisitor {
             pendingClass.setExtendsFrom(classType.getExtendsFrom());
             pendingClass.setFields(classType.getFields());
             pendingClass.setMethods(classType.getMethods());
+            pendingClass.update();
             pendingClasses.remove(className);
             return;
         } else if (classSymbolTable.containsKey(className)) {
@@ -95,30 +95,32 @@ public class BuilderVisitor {
             allParents = getClassType(node.getExtendsFrom().get(), node.getLine()).getAllParents();
             extendsFrom = Optional.of(getClassType(node.getExtendsFrom().get(), node.getLine()));
         }
-        Map<String, Type> fields = new HashMap<>();
-        Map<String, MethodType> methods = new HashMap<>();
-        ClassType thisClass = new ClassType(extendsFrom, fields, methods);
+        List<Pair<String, Type>> fieldsSorted = new ArrayList<>();
+        List<Pair<String, MethodType>> methodsSorted = new ArrayList<>();
+        ClassType thisClass = new ClassType(node.getClassName(), extendsFrom, fieldsSorted, methodsSorted);
         addClassType(node.getClassName(), thisClass);
         for (VarDeclNode varDecl : node.getVarDecls()) {
-            varDecl.accept(this, fields);
+            fieldsSorted.add(varDecl.accept(this));
         }
         for (MethodDeclNode methodDecl : node.getMethodDecls()) {
-            methodDecl.accept(this, methods);
+            Pair<String, MethodType> methodPair = methodDecl.accept(this);
+            MethodType currentMethod = methodPair.second();
+            methodsSorted.add(methodPair);
             for (ClassType parent : allParents) {
                 String methodName = methodDecl.getMethodName();
                 Map<String, MethodType> parentMethods = parent.getMethods();
                 if (parentMethods.containsKey(methodDecl.getMethodName())) {
                     MethodType methodFromParent = parentMethods.get(methodName);
-                    MethodType currentMethod = methods.get(methodName);
                     assert methodFromParent.getReturnType().equals(currentMethod.getReturnType()) : String.format(
                             "Overwritten method in %d should have the same return type as the method in parent class",
                             node.getLine());
-                    Iterator<VariableHolder> argumentsCurrentMethodIter = currentMethod.getArguments()
+                    Iterator<Pair<String, Type>> argumentsCurrentMethodIter = currentMethod.getArgumentsSorted()
                             .iterator();
-                    Iterator<VariableHolder> argumentsMethodFromParentIter = methodFromParent.getArguments().iterator();
+                    Iterator<Pair<String, Type>> argumentsMethodFromParentIter = methodFromParent.getArgumentsSorted()
+                            .iterator();
                     while (argumentsCurrentMethodIter.hasNext()) {
-                        assert argumentsCurrentMethodIter.next().getType()
-                                .equals(argumentsMethodFromParentIter.next().getType()) : String.format(
+                        assert argumentsCurrentMethodIter.next().second()
+                                .equals(argumentsMethodFromParentIter.next().second()) : String.format(
                                         "Overwritten method in %d should be called with the same parameter types as the method in parent class",
                                         node.getLine());
                     }
@@ -127,29 +129,32 @@ public class BuilderVisitor {
                 }
             }
         }
+        thisClass.update();
     }
 
-    public void visit(VarDeclNode node, Map<String, Type> fields) {
-        fields.put(node.getVarName(), getType(node.getVarType(), node.getLine()));
+    public Pair<String, Type> visit(VarDeclNode node) {
+        return new Pair<>(node.getVarName(), getType(node.getVarType(), node.getLine()));
     }
 
-    public void visit(MethodDeclNode node, Map<String, MethodType> methods) {
+    public Pair<String, MethodType> visit(MethodDeclNode node) {
         Type returnType = getType(node.getMethodType(), node.getLine());
         Set<String> varNamesSeenSoFar = new HashSet<>();
-        List<VariableHolder> arguments = new ArrayList<>();
+        List<Pair<String, Type>> argumentsSorted = new ArrayList<>();
         for (Pair<String, String> argument : node.getMethodArgs()) {
             varNamesSeenSoFar.add(argument.second());
-            arguments.add(new VariableHolder(argument.second(), getType(argument.first(), node.getLine())));
+            argumentsSorted.add(new Pair<String, Type>(argument.second(), getType(argument.first(), node.getLine())));
         }
-        Map<String, Type> varsDecls = new HashMap<>();
+        List<Pair<String, Type>> varsDeclsSorted = new ArrayList<>();
         for (VarDeclNode varDecl : node.getVarDecls()) {
             String varName = varDecl.getVarName();
-            if (varNamesSeenSoFar.contains(varName) || varsDecls.containsKey(varName)) {
+            if (varNamesSeenSoFar.contains(varName)) {
                 throw new AssertionError(String.format("Type  \"%s\" has already been declared", varName));
             }
-            varDecl.accept(this, varsDecls);
+            varNamesSeenSoFar.add(varName);
+            varsDeclsSorted.add(varDecl.accept(this));
         }
-        methods.put(node.getMethodName(), new MethodType(returnType, arguments, varsDecls));
+        return new Pair<String, MethodType>(node.getMethodName(),
+                new MethodType(returnType, argumentsSorted, varsDeclsSorted));
     }
 
 }

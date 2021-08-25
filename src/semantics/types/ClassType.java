@@ -1,20 +1,40 @@
 package semantics.types;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import utils.Pair;
+
 public class ClassType extends Type {
 
+    private String className;
     private Optional<ClassType> extendsFrom;
+    private List<Pair<String, Type>> fieldsSorted;
     private Map<String, Type> fields;
+    private List<Pair<String, MethodType>> methodsSorted;
     private Map<String, MethodType> methods;
 
-    public ClassType(Optional<ClassType> extendsFrom, Map<String, Type> fields, Map<String, MethodType> methods) {
+    public ClassType(String className, Optional<ClassType> extendsFrom, List<Pair<String, Type>> fieldsSorted,
+            List<Pair<String, MethodType>> methodsSorted) {
+        this.className = className;
         this.extendsFrom = extendsFrom;
-        this.fields = fields;
-        this.methods = methods;
+        this.fieldsSorted = fieldsSorted;
+        fields = new HashMap<>();
+        for (Pair<String, Type> fieldPair : fieldsSorted) {
+            fields.put(fieldPair.first(), fieldPair.second());
+        }
+        this.methodsSorted = methodsSorted;
+        methods = new HashMap<>();
+        for (Pair<String, MethodType> methodPair : methodsSorted) {
+            methods.put(methodPair.first(), methodPair.second());
+        }
+    }
+
+    public String getClassName() {
+        return className;
     }
 
     public Optional<ClassType> getExtendsFrom() {
@@ -54,6 +74,15 @@ public class ClassType extends Type {
 
     public void setMethods(Map<String, MethodType> otherMethods) {
         methods = otherMethods;
+    }
+
+    public void update() {
+        for (Pair<String, Type> fieldPair : fieldsSorted) {
+            fields.put(fieldPair.first(), fieldPair.second());
+        }
+        for (Pair<String, MethodType> methodPair : methodsSorted) {
+            methods.put(methodPair.first(), methodPair.second());
+        }
     }
 
     @Override public boolean isClassType() {

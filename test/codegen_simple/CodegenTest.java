@@ -10,7 +10,6 @@ import org.antlr.v4.runtime.CharStreams;
 import org.junit.Test;
 
 import antlr_lexer.MJLexer;
-import codegen_simple.SimpleCodegenVisitor;
 import parser.MJParser;
 import parser.ast.GoalNode;
 import semantics.BuilderVisitor;

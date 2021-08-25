@@ -253,9 +253,9 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(MethodCallExpr expr) {
-        // move pointer to "this" into %rax
-        functionsRegion.append("\n\t" + "movq -8(%rbx), %rax");
-        // move first argument ("this") into %rdi
+        // get pointer to object on which the method is being called
+        expr.getObjectSeqExpr().accept(this);
+        // move pointer into %rdi
         functionsRegion.append("\n\t" + "movq %rax, %rdi");
         // TODO: handle function arguments and vTable
     }
@@ -271,7 +271,7 @@ public class SimpleCodegenVisitor {
 
     public void visit(NewObjectDeclExpr expr) {
         int numBytes = objsLayout.get(expr.getObjectName()).getFields().size() + 1;
-        functionsRegion.append("\n\t" + String.format("movq %d, %%rdi", BYTE_SIZE * numBytes));
+        functionsRegion.append("\n\t" + String.format("movq $%d, %%rdi", BYTE_SIZE * numBytes));
         functionsRegion.append("\n\t" + "call calloc");
     }
 

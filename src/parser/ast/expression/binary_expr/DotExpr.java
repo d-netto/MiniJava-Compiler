@@ -21,7 +21,7 @@ public class DotExpr extends ExprNode {
         return leftHandSide;
     }
 
-    public ExprNode getRightHandSide() {
+    public IdentifierExpr getRightHandSide() {
         return rightHandSide;
     }
 

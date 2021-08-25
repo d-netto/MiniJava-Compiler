@@ -19,7 +19,7 @@ public class CodegenTest {
 
     @Test public void TestClassOtherThanMain() throws IOException {
         String simpleProgram = "class Main {\n" + "public static void main(String[] args) {\n"
-                + "System.out.println(new int[10].length)\n;" + "}\n" + "}\n" + "\n" + "class Foo {\n" + "int bar;\n"
+                + "System.out.println(new Foo().baz())\n;" + "}\n" + "}\n" + "\n" + "class Foo {\n" + "int bar;\n"
                 + "public int baz() {\n" + "return 2;\n" + "}\n" + "}\n";
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
@@ -29,7 +29,7 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
-        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(builderVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
         goal.accept(codegenVis);
         System.out.println(codegenVis.getDataRegion() + "\n" + codegenVis.getTextRegion());
     }
@@ -46,7 +46,7 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
-        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(builderVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
         goal.accept(codegenVis);
     }
 

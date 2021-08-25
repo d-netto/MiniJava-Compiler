@@ -1,6 +1,7 @@
 package semantics;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 
 import parser.ast.ClassNode;
@@ -52,6 +53,14 @@ public class TypesVisitor {
         this.builderVis = builderVis;
     }
 
+    public Map<String, ClassType> getClassSymbolTable() {
+        return builderVis.getClassSymbolTable();
+    }
+
+    public ClassType getClassType(String className, int line) {
+        return builderVis.getClassType(className, line);
+    }
+
     private Type getVarType(String name, int line) {
         if (currentMethod.isPresent()) {
             if (currentMethod.get().getVarsDecl().containsKey(name)) {
@@ -70,11 +79,15 @@ public class TypesVisitor {
         throw new AssertionError(String.format("Type \"%s\" used in line %d was not defined", name, line));
     }
 
-    private void setCurrentClass(ClassNode node) {
+    public void setCurrentClass(ClassNode node) {
         currentClass = Optional.of(builderVis.getClassType(node.getClassName(), node.getLine()));
     }
 
-    private void setCurrentMethod(MethodDeclNode node) {
+    public Optional<ClassType> getCurrentClass() {
+        return currentClass;
+    }
+
+    public void setCurrentMethod(MethodDeclNode node) {
         for (ClassType classType : currentClass.get().getAllParents()) {
             if (classType.getMethods().containsKey(node.getMethodName())) {
                 currentMethod = Optional.of(classType.getMethods().get(node.getMethodName()));
@@ -84,6 +97,10 @@ public class TypesVisitor {
         throw new AssertionError(
                 String.format("Method \"%s\" used in line %d was not defined in its class or parent classes",
                         node.getMethodName(), node.getLine()));
+    }
+
+    public Optional<MethodType> getCurrentMethod() {
+        return currentMethod;
     }
 
     public Type visit(IdentifierExpr expr) {

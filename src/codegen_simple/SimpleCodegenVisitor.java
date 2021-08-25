@@ -14,6 +14,7 @@ import parser.ast.ClassNode;
 import parser.ast.GoalNode;
 import parser.ast.MethodDeclNode;
 import parser.ast.VarDeclNode;
+import parser.ast.base_abs_classes.ExprNode;
 import parser.ast.base_abs_classes.StatementNode;
 import parser.ast.expression.ArrayAccessExpr;
 import parser.ast.expression.LengthExpr;
@@ -38,9 +39,10 @@ import parser.ast.statement.PrintStatement;
 import parser.ast.statement.SetArrayIndexStatement;
 import parser.ast.statement.SetVariableStatement;
 import parser.ast.statement.WhileStatement;
-import semantics.BuilderVisitor;
+import semantics.TypesVisitor;
 import semantics.types.ClassType;
 import semantics.types.MethodType;
+import semantics.types.Type;
 import utils.Pair;
 
 public class SimpleCodegenVisitor {
@@ -70,7 +72,7 @@ public class SimpleCodegenVisitor {
             for (ClassType parentClass : allParents) {
                 // handles fields in the class hierarchy (NOTE: we can have field in child class
                 // with same name as field in parent class,
-                // and in this case both show up in the object layout)
+                // and in this case, both show up in the object layout)
                 parentClass.getFields();
                 List<String> fieldsInParent = new ArrayList<>(parentClass.getFields().keySet());
                 Collections.sort(fieldsInParent);
@@ -103,27 +105,24 @@ public class SimpleCodegenVisitor {
 
     }
 
-    private int blockNumber;
-    private Optional<ClassType> currentClass;
-    private Optional<MethodType> currentMethod;
+    // TODO: use this to count the label indices when implementing short-circuit
+    // private int blockNumber;
     private StringBuilder dataRegion;
     private StringBuilder textRegion;
     private Set<Pair<String, String>> methodsAlreadyWritten;
     private Map<String, ObjectLayout> objsLayout;
-    private BuilderVisitor builderVis;
+    private TypesVisitor typesVis;
 
-    public SimpleCodegenVisitor(BuilderVisitor builderVis) {
-        blockNumber = 0;
-        currentClass = Optional.empty();
-        currentMethod = Optional.empty();
+    public SimpleCodegenVisitor(TypesVisitor typesVis) {
+        // blockNumber = 0;
         dataRegion = new StringBuilder();
         textRegion = new StringBuilder();
         methodsAlreadyWritten = new HashSet<>();
         objsLayout = new HashMap<>();
-        for (ClassType classType : builderVis.getClassSymbolTable().values()) {
+        for (ClassType classType : typesVis.getClassSymbolTable().values()) {
             objsLayout.put(classType.getClassName(), new ObjectLayout(classType));
         }
-        this.builderVis = builderVis;
+        this.typesVis = typesVis;
     }
 
     public String getDataRegion() {
@@ -135,24 +134,26 @@ public class SimpleCodegenVisitor {
     }
 
     private void setCurrentClass(ClassNode node) {
-        currentClass = Optional.of(builderVis.getClassType(node.getClassName(), node.getLine()));
+        typesVis.setCurrentClass(node);
+    }
+
+    private Optional<ClassType> getCurrentClass() {
+        return typesVis.getCurrentClass();
     }
 
     private void setCurrentMethod(MethodDeclNode node) {
-        for (ClassType classType : currentClass.get().getAllParents()) {
-            if (classType.getMethods().containsKey(node.getMethodName())) {
-                currentMethod = Optional.of(classType.getMethods().get(node.getMethodName()));
-                return;
-            }
-        }
-        throw new AssertionError(
-                String.format("Method \"%s\" used in line %d was not defined in its class or parent classes",
-                        node.getMethodName(), node.getLine()));
+        typesVis.setCurrentMethod(node);
+    }
+
+    private Optional<MethodType> getCurrentMethod() {
+        return typesVis.getCurrentMethod();
     }
 
     public void visit(IdentifierExpr expr) {
         String idName = expr.getIdentifierName();
-        if (currentMethod.isPresent()) {
+        Optional<ClassType> currentClass = getCurrentClass();
+        Optional<MethodType> currentMethod = getCurrentMethod();
+        if (currentClass.isPresent()) {
             // case 1: function argument
             int argumentIndex = findFirst(currentMethod.get().getArgumentsSorted(), elt -> elt.first().equals(idName));
             if (currentMethod.get().getArguments().containsKey(idName)) {
@@ -213,6 +214,16 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(DotExpr expr) {
+        expr.getLeftHandSide().accept(this);
+        // this is safe (doesn't change typesVis' currentClass/Method) because DotExpr
+        // doesn't visit a ClassNode or MethodDeclNode
+        Type objType = expr.getLeftHandSide().accept(typesVis);
+        assert objType.isClassType() : "This should have failed semantic checks";
+        int fieldIndex = findFirst(objsLayout.get(((ClassType) objType).getClassName()).getFields(),
+                elt -> elt.equals(expr.getRightHandSide().getIdentifierName()));
+        assert fieldIndex != -1 : "This should have failed semantic checks";
+        textRegion.append("\n\t" + String.format("movq -%d(%%rax), %%rax", BYTE_SIZE * fieldIndex));
+
     }
 
     public void visit(LtExpr expr) {
@@ -252,11 +263,28 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(MethodCallExpr expr) {
+        // push arguments into the stack
+        List<ExprNode> args = expr.getArgs();
+        assert args.size() + 1 <= ARGUMENT_REGISTERS
+                .size() : "Current implementation doesn't support more than 6 arguments";
+        for (int i = 0; i < args.size(); ++i) {
+            args.get(i).accept(this);
+            textRegion.append("\n\t" + String.format("movq %%rax, %s", ARGUMENT_REGISTERS.get(i)));
+        }
         // get pointer to object on which the method is being called
         expr.getObjectSeqExpr().accept(this);
-        // move pointer into %rdi
-        textRegion.append("\n\t" + "movq %rax, %rdi");
-        // TODO: handle function arguments and vTable
+        // dereference pointer to base of vTable and move it to %rax
+        textRegion.append("\n\t" + "movq 0(%rax), %rax");
+        // this is safe (doesn't change typesVis' currentClass/Method) because
+        // MethodCallExpr doesn't visit a ClassNode or MethodDeclNode
+        Type objType = expr.getObjectSeqExpr().accept(typesVis);
+        assert objType.isClassType() : "This should have failed semantic checks";
+        int methodIndex = findFirst(objsLayout.get(((ClassType) objType).getClassName()).getVTable(),
+                elt -> elt.second().equals(expr.getMethodNameExpr().getIdentifierName()));
+        assert methodIndex != -1 : "This should have failed semantic checks";
+        textRegion.append("\n\t" + String.format("movq %d(%%rax), %%rax", BYTE_SIZE * (methodIndex + 1)));
+        textRegion.append("\n\t" + "call *%rax");
+
     }
 
     public void visit(NewArrayDeclExpr expr) {
@@ -275,10 +303,13 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(NewObjectDeclExpr expr) {
-        int numBytes = objsLayout.get(expr.getObjectName()).getFields().size() + 1;
+        String objectName = expr.getObjectName();
+        int numBytes = objsLayout.get(objectName).getFields().size() + 1;
         textRegion.append("\n\t" + String.format("movq $%d, %%rdi", BYTE_SIZE * numBytes));
+        textRegion.append("\n\t" + "movq $8, %rsi");
         textRegion.append("\n\t" + "call calloc");
-        // TODO: move vTable to (%rax)
+        textRegion.append("\n\t" + String.format("leaq %s, %%rdx", objectName + "$$"));
+        textRegion.append("\n\t" + "movq %rdx, 0(%rax)");
     }
 
     public void visit(NotExpr expr) {
@@ -312,7 +343,14 @@ public class SimpleCodegenVisitor {
 
     public void visit(ClassNode node) {
         setCurrentClass(node);
-        dataRegion.append("\n" + String.format("%s$:", node.getClassName()));
+        Optional<ClassType> currentClass = getCurrentClass();
+        dataRegion.append("\n" + String.format("%s$$:", node.getClassName()));
+        if (currentClass.isPresent() && currentClass.get().getExtendsFrom().isPresent()) {
+            dataRegion.append(
+                    "\nt" + String.format(".quad %s", currentClass.get().getExtendsFrom().get().getClassName() + "$$"));
+        } else {
+            dataRegion.append("\n\t" + ".quad 0");
+        }
         for (MethodDeclNode methodDeclNode : node.getMethodDecls()) {
             List<Pair<String, String>> currentVTable = objsLayout.get(currentClass.get().getClassName()).getVTable();
             Pair<String, String> methodPair = currentVTable
@@ -330,7 +368,7 @@ public class SimpleCodegenVisitor {
     public void visit(GoalNode node) {
         dataRegion.append(".data");
         dataRegion.append("\n" + "stdout_buffer:");
-        dataRegion.append("\n\t" + ".string \"%d\"");
+        dataRegion.append("\n\t" + ".string \"%d\\n\"");
         textRegion.append("\n" + ".text");
         textRegion.append("\n" + ".global main");
         textRegion.append("\n\n" + "main:");
@@ -348,6 +386,7 @@ public class SimpleCodegenVisitor {
 
     public void visit(MethodDeclNode node) {
         setCurrentMethod(node);
+        Optional<MethodType> currentMethod = getCurrentMethod();
         textRegion.append("\n\t" + "pushq %rbp");
         textRegion.append("\n\t" + "movq %rsp, %rbp");
         int stackAllocBytes = 1 + currentMethod.get().getArgumentsSorted().size()
@@ -377,6 +416,7 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(VarDeclNode node) {
+        Optional<MethodType> currentMethod = getCurrentMethod();
         int varDeclIndex = findFirst(currentMethod.get().getVarsDeclSorted(),
                 elt -> elt.first().equals(node.getVarName()));
         assert varDeclIndex != -1 : "This should have failed semantic checks";

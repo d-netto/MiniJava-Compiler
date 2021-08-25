@@ -34,7 +34,7 @@ public class BuilderVisitor {
     }
 
     public Map<String, ClassType> getClassSymbolTable() {
-        return new HashMap<>(classSymbolTable);
+        return classSymbolTable;
     }
 
     public ClassType getClassType(String className, int line) {

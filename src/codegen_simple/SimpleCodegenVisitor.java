@@ -46,7 +46,7 @@ import utils.Pair;
 public class SimpleCodegenVisitor {
 
     static final int BYTE_SIZE = 8;
-    static final List<String> REGISTERS = List.of("%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9");
+    static final List<String> ARGUMENT_REGISTERS = List.of("%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9");
 
     static private <T> int findFirst(List<T> searched, Function<T, Boolean> func) {
         for (int i = 0; i < searched.size(); ++i) {
@@ -106,8 +106,8 @@ public class SimpleCodegenVisitor {
     private int blockNumber;
     private Optional<ClassType> currentClass;
     private Optional<MethodType> currentMethod;
-    private StringBuilder preamble;
-    private StringBuilder functionsRegion;
+    private StringBuilder dataRegion;
+    private StringBuilder textRegion;
     private Set<Pair<String, String>> methodsAlreadyWritten;
     private Map<String, ObjectLayout> objsLayout;
     private BuilderVisitor builderVis;
@@ -116,8 +116,8 @@ public class SimpleCodegenVisitor {
         blockNumber = 0;
         currentClass = Optional.empty();
         currentMethod = Optional.empty();
-        preamble = new StringBuilder();
-        functionsRegion = new StringBuilder();
+        dataRegion = new StringBuilder();
+        textRegion = new StringBuilder();
         methodsAlreadyWritten = new HashSet<>();
         objsLayout = new HashMap<>();
         for (ClassType classType : builderVis.getClassSymbolTable().values()) {
@@ -126,12 +126,12 @@ public class SimpleCodegenVisitor {
         this.builderVis = builderVis;
     }
 
-    public String getPreamble() {
-        return preamble.toString();
+    public String getDataRegion() {
+        return dataRegion.toString();
     }
 
-    public String getFunctionsRegion() {
-        return functionsRegion.toString();
+    public String getTextRegion() {
+        return textRegion.toString();
     }
 
     private void setCurrentClass(ClassNode node) {
@@ -157,14 +157,14 @@ public class SimpleCodegenVisitor {
             int argumentIndex = findFirst(currentMethod.get().getArgumentsSorted(), elt -> elt.first().equals(idName));
             if (currentMethod.get().getArguments().containsKey(idName)) {
                 int offset = BYTE_SIZE * (1 + argumentIndex);
-                functionsRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", offset));
+                textRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", offset));
                 return;
             }
             // case 2: variable declared in function scope
             int varDeclIndex = findFirst(currentMethod.get().getVarsDeclSorted(), elt -> elt.first().equals(idName));
             if (varDeclIndex != -1) {
                 int offset = BYTE_SIZE * (1 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
-                functionsRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", offset));
+                textRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", offset));
                 return;
             }
         }
@@ -175,9 +175,9 @@ public class SimpleCodegenVisitor {
             if (fieldIndex != -1) {
                 int offset = BYTE_SIZE * fieldIndex;
                 // "this" is stored in -8(%rbp) --> move it to %rax
-                functionsRegion.append("\n\t" + String.format("movq -%d(%%rax), %%rax", BYTE_SIZE));
+                textRegion.append("\n\t" + String.format("movq -%d(%%rax), %%rax", BYTE_SIZE));
                 // get the corresponding field in "this" and move it to %rax
-                functionsRegion.append("\n\t" + String.format("movq -%d(%%rax), %%rax", offset));
+                textRegion.append("\n\t" + String.format("movq -%d(%%rax), %%rax", offset));
             }
             return;
 
@@ -186,26 +186,26 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(IntExpr expr) {
-        functionsRegion.append("\n\t" + String.format("movq $%d, %%rax", Integer.parseInt(expr.getIntegerVal())));
+        textRegion.append("\n\t" + String.format("movq $%d, %%rax", Integer.parseInt(expr.getIntegerVal())));
     }
 
     public void visit(FalseExpr expr) {
-        functionsRegion.append("\n\t" + "movq $0, %rax");
+        textRegion.append("\n\t" + "movq $0, %rax");
     }
 
     public void visit(TrueExpr expr) {
-        functionsRegion.append("\n\t" + "movq $1, %rax");
+        textRegion.append("\n\t" + "movq $1, %rax");
     }
 
     public void visit(ThisExpr expr) {
-        functionsRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", BYTE_SIZE));
+        textRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", BYTE_SIZE));
     }
 
     public void visit(AddExpr expr) {
         expr.getRightHandSide().accept(this);
-        functionsRegion.append("\n\t" + "movq %rax, %rdx");
+        textRegion.append("\n\t" + "movq %rax, %rdx");
         expr.getLeftHandSide().accept(this);
-        functionsRegion.append("\n\t" + "addq %rdx, %%rax");
+        textRegion.append("\n\t" + "addq %rdx, %%rax");
     }
 
     public void visit(AndExpr expr) {
@@ -220,63 +220,69 @@ public class SimpleCodegenVisitor {
 
     public void visit(MultExpr expr) {
         expr.getRightHandSide().accept(this);
-        functionsRegion.append("\n\t" + "movq %rax, %rdx");
+        textRegion.append("\n\t" + "movq %rax, %rdx");
         expr.getLeftHandSide().accept(this);
-        functionsRegion.append("\n\t" + "mulq %rdx, %rax");
+        textRegion.append("\n\t" + "mulq %rdx, %rax");
     }
 
     public void visit(SubExpr expr) {
         expr.getRightHandSide().accept(this);
-        functionsRegion.append("\n\t" + "movq %rax, %rdx");
+        textRegion.append("\n\t" + "movq %rax, %rdx");
         expr.getLeftHandSide().accept(this);
-        functionsRegion.append("\n\t" + "subq %rdx, %rax");
+        textRegion.append("\n\t" + "subq %rdx, %rax");
     }
 
     public void visit(ArrayAccessExpr expr) {
         // get the array reference (which will be in %rax)
         expr.getArray().accept(this);
         // move it to %rdx
-        functionsRegion.append("\n\t" + "movq %rax, %rdx");
+        textRegion.append("\n\t" + "movq %rax, %rdx");
         expr.getIndex().accept(this);
-        // zeroth element of the array stores its length, so need to increment index by
-        // one
-        functionsRegion.append("\n\t" + "incq %rax");
+        // zeroth element of the array stores its length, so increment index by one
+        textRegion.append("\n\t" + "incq %rax");
         // dereference pointer to array element and move it to %rax
-        functionsRegion.append("\n\t" + "movq (%rdx, %rax, -8), %rax");
+        textRegion.append("\n\t" + "movq (%rdx, %rax, -8), %rax");
     }
 
     public void visit(LengthExpr expr) {
         // get the array reference (which will be in %rax)
         expr.getLenExpr().accept(this);
         // zeroth element of the array stores its length
-        functionsRegion.append("\n\t" + "movq 0(%rax), %rax");
+        textRegion.append("\n\t" + "movq 0(%rax), %rax");
     }
 
     public void visit(MethodCallExpr expr) {
         // get pointer to object on which the method is being called
         expr.getObjectSeqExpr().accept(this);
         // move pointer into %rdi
-        functionsRegion.append("\n\t" + "movq %rax, %rdi");
+        textRegion.append("\n\t" + "movq %rax, %rdi");
         // TODO: handle function arguments and vTable
     }
 
     public void visit(NewArrayDeclExpr expr) {
+        // %rax contains the array size
         expr.getSize().accept(this);
-        // %rax contains the array size, which needs to be incremented by one because
-        // zeroth element stores the size
-        functionsRegion.append("\n\t" + "incq %rax");
-        functionsRegion.append("\n\t" + "movq %rax, %rdi");
-        functionsRegion.append("\n\t" + "call calloc");
+        // callee saved register to hold the length
+        textRegion.append("\n\t" + "movq %rax, %r12");
+        // increment by one because zeroth byte holds size
+        textRegion.append("\n\t" + "incq %rax");
+        // pass number of blocks and block-size to calloc
+        textRegion.append("\n\t" + "movq %rax, %rdi");
+        textRegion.append("\n\t" + "movq $8, %rsi");
+        textRegion.append("\n\t" + "call calloc");
+        // store length in the zeroth element
+        textRegion.append("\n\t" + "movq %r12, 0(%rax)");
     }
 
     public void visit(NewObjectDeclExpr expr) {
         int numBytes = objsLayout.get(expr.getObjectName()).getFields().size() + 1;
-        functionsRegion.append("\n\t" + String.format("movq $%d, %%rdi", BYTE_SIZE * numBytes));
-        functionsRegion.append("\n\t" + "call calloc");
+        textRegion.append("\n\t" + String.format("movq $%d, %%rdi", BYTE_SIZE * numBytes));
+        textRegion.append("\n\t" + "call calloc");
+        // TODO: move vTable to (%rax)
     }
 
     public void visit(NotExpr expr) {
-        functionsRegion.append("\n\t" + "notq %rax");
+        textRegion.append("\n\t" + "notq %rax");
     }
 
     public void visit(BlockStatement statement) {
@@ -290,9 +296,9 @@ public class SimpleCodegenVisitor {
 
     public void visit(PrintStatement statement) {
         statement.getPrintExpr().accept(this);
-        functionsRegion.append("\n\t" + "leaq stdout_buffer, %rdi");
-        functionsRegion.append("\n\t" + "movq %rax, %rsi");
-        functionsRegion.append("\n\t" + "call printf");
+        textRegion.append("\n\t" + "leaq stdout_buffer, %rdi");
+        textRegion.append("\n\t" + "movq %rax, %rsi");
+        textRegion.append("\n\t" + "call printf");
     }
 
     public void visit(SetArrayIndexStatement statement) {
@@ -306,35 +312,35 @@ public class SimpleCodegenVisitor {
 
     public void visit(ClassNode node) {
         setCurrentClass(node);
-        preamble.append("\n" + String.format("%s$:", node.getClassName()));
+        dataRegion.append("\n" + String.format("%s$:", node.getClassName()));
         for (MethodDeclNode methodDeclNode : node.getMethodDecls()) {
             List<Pair<String, String>> currentVTable = objsLayout.get(currentClass.get().getClassName()).getVTable();
             Pair<String, String> methodPair = currentVTable
                     .get(findFirst(currentVTable, elt -> elt.second().equals(methodDeclNode.getMethodName())));
-            preamble.append(String.format("\n\t" + ".quad %s$%s", methodPair.first(), methodPair.second()));
+            dataRegion.append(String.format("\n\t" + ".quad %s$%s", methodPair.first(), methodPair.second()));
             if (!(methodsAlreadyWritten.contains(methodPair))) {
-                functionsRegion.append("\n\n" + methodPair.toString() + ":");
+                textRegion.append("\n\n" + methodPair.toString() + ":");
                 methodDeclNode.accept(this);
                 methodsAlreadyWritten.add(methodPair);
             }
         }
-        preamble.append("\n\t" + ".align 16");
+        dataRegion.append("\n\t" + ".align 16");
     }
 
     public void visit(GoalNode node) {
-        preamble.append(".data");
-        preamble.append("\n" + "stdout_buffer:");
-        preamble.append("\n\t" + ".string \"%d\"");
-        functionsRegion.append("\n" + ".text");
-        functionsRegion.append("\n" + ".global main");
-        functionsRegion.append("\n\n" + "main:");
-        functionsRegion.append("\n\t" + "pushq %rbp");
-        functionsRegion.append("\n\t" + "movq %rsp, %rbp");
+        dataRegion.append(".data");
+        dataRegion.append("\n" + "stdout_buffer:");
+        dataRegion.append("\n\t" + ".string \"%d\"");
+        textRegion.append("\n" + ".text");
+        textRegion.append("\n" + ".global main");
+        textRegion.append("\n\n" + "main:");
+        textRegion.append("\n\t" + "pushq %rbp");
+        textRegion.append("\n\t" + "movq %rsp, %rbp");
         node.getStatement().accept(this);
-        functionsRegion.append("\n\t" + "movq $0, %rax");
-        functionsRegion.append("\n\t" + "movq %rbp, %rsp");
-        functionsRegion.append("\n\t" + "popq %rbp");
-        functionsRegion.append("\n\t" + "ret");
+        textRegion.append("\n\t" + "movq $0, %rax");
+        textRegion.append("\n\t" + "movq %rbp, %rsp");
+        textRegion.append("\n\t" + "popq %rbp");
+        textRegion.append("\n\t" + "ret");
         for (ClassNode classNode : node.getClasses()) {
             classNode.accept(this);
         }
@@ -342,20 +348,21 @@ public class SimpleCodegenVisitor {
 
     public void visit(MethodDeclNode node) {
         setCurrentMethod(node);
-        functionsRegion.append("\n\t" + "pushq %rbp");
-        functionsRegion.append("\n\t" + "movq %rsp, %rbp");
+        textRegion.append("\n\t" + "pushq %rbp");
+        textRegion.append("\n\t" + "movq %rsp, %rbp");
         int stackAllocBytes = 1 + currentMethod.get().getArgumentsSorted().size()
                 + currentMethod.get().getVarsDeclSorted().size();
         // stack needs to be 16 aligned before calling printf, calloc, etc.
         if (stackAllocBytes % 2 == 1) {
             stackAllocBytes += 1;
         }
-        functionsRegion.append("\n\t" + String.format("subq $%d, %%rsp", BYTE_SIZE * stackAllocBytes));
+        textRegion.append("\n\t" + String.format("subq $%d, %%rsp", BYTE_SIZE * stackAllocBytes));
         int numberOfArgs = node.getMethodArgs().size() + 1;
-        assert numberOfArgs <= REGISTERS.size() : "Current implementation doesn't support more than 6 arguments";
+        assert numberOfArgs <= ARGUMENT_REGISTERS
+                .size() : "Current implementation doesn't support more than 6 arguments";
         for (int i = 0; i < numberOfArgs; ++i) {
-            functionsRegion
-                    .append("\n\t" + String.format("movq %s, -%d(%%rbp)", REGISTERS.get(i), BYTE_SIZE * (i + 1)));
+            textRegion.append(
+                    "\n\t" + String.format("movq %s, -%d(%%rbp)", ARGUMENT_REGISTERS.get(i), BYTE_SIZE * (i + 1)));
         }
         for (VarDeclNode varDeclNode : node.getVarDecls()) {
             varDeclNode.accept(this);
@@ -364,9 +371,9 @@ public class SimpleCodegenVisitor {
             statementNode.accept(this);
         }
         node.getReturnExpr().accept(this);
-        functionsRegion.append("\n\t" + "movq %rbp, %rsp");
-        functionsRegion.append("\n\t" + "popq %rbp");
-        functionsRegion.append("\n\t" + "ret");
+        textRegion.append("\n\t" + "movq %rbp, %rsp");
+        textRegion.append("\n\t" + "popq %rbp");
+        textRegion.append("\n\t" + "ret");
     }
 
     public void visit(VarDeclNode node) {
@@ -374,7 +381,7 @@ public class SimpleCodegenVisitor {
                 elt -> elt.first().equals(node.getVarName()));
         assert varDeclIndex != -1 : "This should have failed semantic checks";
         int offset = BYTE_SIZE * (1 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
-        functionsRegion.append(String.format("movq $0, -%d(%%rbp)", offset));
+        textRegion.append(String.format("movq $0, -%d(%%rbp)", offset));
     }
 
 }

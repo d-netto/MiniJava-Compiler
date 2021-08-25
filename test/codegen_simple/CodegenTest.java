@@ -1,4 +1,4 @@
-package codegen;
+package codegen_simple;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class CodegenTest {
 
     @Test public void TestClassOtherThanMain() throws IOException {
         String simpleProgram = "class Main {\n" + "public static void main(String[] args) {\n"
-                + "System.out.println(2)\n;" + "}\n" + "}\n" + "\n" + "class Foo {\n" + "int bar;\n"
+                + "System.out.println(new int[10].length)\n;" + "}\n" + "}\n" + "\n" + "class Foo {\n" + "int bar;\n"
                 + "public int baz() {\n" + "return 2;\n" + "}\n" + "}\n";
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
         MJLexer mjLexer = new MJLexer(CharStreams.fromStream(targetStream));
@@ -32,7 +32,7 @@ public class CodegenTest {
         goal.accept(typesVis);
         SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(builderVis);
         goal.accept(codegenVis);
-        System.out.println(codegenVis.getPreamble() + "\n" + codegenVis.getFunctionsRegion());
+        System.out.println(codegenVis.getDataRegion() + "\n" + codegenVis.getTextRegion());
     }
 
     // All of the following test files were taken form

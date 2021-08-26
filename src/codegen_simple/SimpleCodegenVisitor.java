@@ -520,7 +520,7 @@ public class SimpleCodegenVisitor {
         textRegion.append("\n\t" + "popq %rdx");
         --currentStackSize;
         // move RHS into appropriate array slot
-        textRegion.append("\n\t" + "movq %rax, (%rdx)");
+        textRegion.append("\n\t" + "movq %rax, 0(%rdx)");
     }
 
     public void visit(WhileStatement statement) {

@@ -123,3 +123,9 @@ block$3:
 	popq %rbp
 	ret
 ```
+
+## Future Work
+
+- [ ] Command line interface.
+- [ ] New intermediate representation and dataflow optimizations.
+- [ ] Register allocation.

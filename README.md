@@ -4,7 +4,7 @@ Compiler for a subset of Java introduced by Appel's Modern Compiler Implementati
 
 Files in `test/test_files` were taken from the MiniJava project page (https://www.cambridge.org/resources/052182060X/).
 
-## Example of AT&T x86 Code Generation
+## Example of AT&T x86 Assembly Code Generation
 
 The following recursive implementation of factorial
 

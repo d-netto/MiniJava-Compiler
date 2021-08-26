@@ -32,8 +32,7 @@ class Fac {
 
 compiles down to
 
-x86
-```
+```assembly
 .data
 stdout_buffer:
 	.string "%d\n"

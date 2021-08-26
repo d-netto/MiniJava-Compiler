@@ -225,7 +225,8 @@ public class TypesVisitor {
     }
 
     public Type visit(NewArrayDeclExpr expr) {
-        // TODO: check if declared size is int
+        Type sizeType = expr.getSize().accept(this);
+        assert sizeType.isIntType() : String.format("Type mismatch in line %d", expr.getLine());
         return new IntArrayType();
     }
 

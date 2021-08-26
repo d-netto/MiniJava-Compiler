@@ -91,7 +91,7 @@ block$1:
 	pushq %rax
 	movq $1, %rax
 	popq %rdx
-	movq %rax, (%rdx)
+	movq %rax, 0(%rdx)
 	jmp block$3
 block$2:
 	leaq -24(%rbp), %rax
@@ -116,7 +116,7 @@ block$2:
 	popq %rdx
 	mulq %rdx
 	popq %rdx
-	movq %rax, (%rdx)
+	movq %rax, 0(%rdx)
 block$3:
 	movq -24(%rbp), %rax
 	movq %rbp, %rsp

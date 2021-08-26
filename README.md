@@ -8,8 +8,7 @@ Files in `test/test_files` were taken from the MiniJava project page (https://ww
 
 The following recursive implementation of factorial
 
-java
-```
+```java
 class Factorial {
 
     public static void main(String[] a) {

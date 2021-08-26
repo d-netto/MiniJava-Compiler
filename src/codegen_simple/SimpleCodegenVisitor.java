@@ -49,8 +49,8 @@ public class SimpleCodegenVisitor {
     static final int REGISTER_SIZE = 8;
     static final List<String> ARGUMENT_REGISTERS = List.of("%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9");
 
-    static private <T, V> int findFirst(List<Pair<T, V>> searched, String name) {
-        for (int i = searched.size() - 1; i >= 0; --i) {
+    static private <T, V> int findFirstIndex(List<Pair<T, V>> searched, String name) {
+        for (int i = 0; i < searched.size(); ++i) {
             if (searched.get(i).first().equals(name)) {
                 return i;
             }
@@ -58,8 +58,8 @@ public class SimpleCodegenVisitor {
         return -1;
     }
 
-    static private <T> int findLast(List<T> searched, String name) {
-        for (int i = 0; i < searched.size(); ++i) {
+    static private <T> int findLastIndex(List<T> searched, String name) {
+        for (int i = searched.size() - 1; i >= 0; --i) {
             if (searched.get(i).equals(name)) {
                 return i;
             }
@@ -91,7 +91,7 @@ public class SimpleCodegenVisitor {
                 String parentClassName = parentClass.getClassName();
                 for (Pair<String, MethodType> methodPair : parentClass.getMethodsSorted()) {
                     String methodName = methodPair.first();
-                    int firstIndex = findFirst(vTable, methodName);
+                    int firstIndex = findFirstIndex(vTable, methodName);
                     Pair<String, String> vTableEntry = new Pair<>(methodName, parentClassName);
                     if (firstIndex == -1) {
                         vTable.add(vTableEntry);
@@ -162,14 +162,14 @@ public class SimpleCodegenVisitor {
         Optional<MethodType> currentMethod = getCurrentMethod();
         if (currentClass.isPresent()) {
             // case 1: function argument
-            int argumentIndex = findFirst(currentMethod.get().getArgumentsSorted(), varName);
+            int argumentIndex = findFirstIndex(currentMethod.get().getArgumentsSorted(), varName);
             if (currentMethod.get().getArguments().containsKey(varName)) {
                 int offset = REGISTER_SIZE * (2 + argumentIndex);
                 textRegion.append("\n\t" + String.format("leaq -%d(%%rbp), %%rax", offset));
                 return;
             }
             // case 2: variable declared in function scope
-            int varDeclIndex = findFirst(currentMethod.get().getVarsDeclSorted(), varName);
+            int varDeclIndex = findFirstIndex(currentMethod.get().getVarsDeclSorted(), varName);
             if (varDeclIndex != -1) {
                 int offset = REGISTER_SIZE * (2 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
                 textRegion.append("\n\t" + String.format("leaq -%d(%%rbp), %%rax", offset));
@@ -179,7 +179,7 @@ public class SimpleCodegenVisitor {
         // case 3: object field
         if (currentClass.isPresent()) {
             List<String> objectFields = objsLayout.get(currentClass.get().getClassName()).getFields();
-            int fieldIndex = findLast(objectFields, varName);
+            int fieldIndex = findLastIndex(objectFields, varName);
             if (fieldIndex != -1) {
                 int offset = REGISTER_SIZE * (1 + fieldIndex);
                 // "this" is stored in -8(%rbp) --> move it to %rax
@@ -199,14 +199,14 @@ public class SimpleCodegenVisitor {
         Optional<MethodType> currentMethod = getCurrentMethod();
         if (currentClass.isPresent()) {
             // case 1: function argument
-            int argumentIndex = findFirst(currentMethod.get().getArgumentsSorted(), idName);
+            int argumentIndex = findFirstIndex(currentMethod.get().getArgumentsSorted(), idName);
             if (currentMethod.get().getArguments().containsKey(idName)) {
                 int offset = REGISTER_SIZE * (2 + argumentIndex);
                 textRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", offset));
                 return;
             }
             // case 2: variable declared in function scope
-            int varDeclIndex = findFirst(currentMethod.get().getVarsDeclSorted(), idName);
+            int varDeclIndex = findFirstIndex(currentMethod.get().getVarsDeclSorted(), idName);
             if (varDeclIndex != -1) {
                 int offset = REGISTER_SIZE * (2 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
                 textRegion.append("\n\t" + String.format("movq -%d(%%rbp), %%rax", offset));
@@ -215,7 +215,7 @@ public class SimpleCodegenVisitor {
         }
         // case 3: object field
         if (currentClass.isPresent()) {
-            int fieldIndex = findLast(objsLayout.get(currentClass.get().getClassName()).getFields(), idName);
+            int fieldIndex = findLastIndex(objsLayout.get(currentClass.get().getClassName()).getFields(), idName);
             if (fieldIndex != -1) {
                 int offset = REGISTER_SIZE * (1 + fieldIndex);
                 // "this" is stored in -8(%rbp) --> move it to %rax
@@ -272,7 +272,7 @@ public class SimpleCodegenVisitor {
         // doesn't visit a ClassNode or MethodDeclNode
         Type objType = expr.getLeftHandSide().accept(typesVis);
         assert objType.isClassType() : "This should have failed semantic checks";
-        int fieldIndex = findLast(objsLayout.get(((ClassType) objType).getClassName()).getFields(),
+        int fieldIndex = findLastIndex(objsLayout.get(((ClassType) objType).getClassName()).getFields(),
                 expr.getRightHandSide().getIdentifierName());
         assert fieldIndex != -1 : "This should have failed semantic checks";
         textRegion.append("\n\t" + String.format("movq %d(%%rax), %%rax", REGISTER_SIZE * fieldIndex));
@@ -358,7 +358,7 @@ public class SimpleCodegenVisitor {
         // MethodCallExpr doesn't visit a ClassNode or MethodDeclNode
         Type objType = expr.getObjectSeqExpr().accept(typesVis);
         assert objType.isClassType() : "This should have failed semantic checks";
-        int methodIndex = findFirst(objsLayout.get(((ClassType) objType).getClassName()).getVTable(),
+        int methodIndex = findFirstIndex(objsLayout.get(((ClassType) objType).getClassName()).getVTable(),
                 expr.getMethodNameExpr().getIdentifierName());
         assert methodIndex != -1 : "This should have failed semantic checks";
         textRegion.append("\n\t" + String.format("movq %d(%%rax), %%rax", REGISTER_SIZE * (methodIndex + 1)));
@@ -550,7 +550,7 @@ public class SimpleCodegenVisitor {
         dataRegion.append("\n\t" + ".align 16");
         for (MethodDeclNode methodDeclNode : node.getMethodDecls()) {
             Pair<String, String> methodPair = currentVTable
-                    .get(findFirst(currentVTable, methodDeclNode.getMethodName()));
+                    .get(findFirstIndex(currentVTable, methodDeclNode.getMethodName()));
             if (!(methodsAlreadyWritten.contains(methodPair))) {
                 textRegion.append("\n\n" + methodPair.toString() + ":");
                 methodDeclNode.accept(this);
@@ -612,7 +612,7 @@ public class SimpleCodegenVisitor {
 
     public void visit(VarDeclNode node) {
         Optional<MethodType> currentMethod = getCurrentMethod();
-        int varDeclIndex = findFirst(currentMethod.get().getVarsDeclSorted(), node.getVarName());
+        int varDeclIndex = findFirstIndex(currentMethod.get().getVarsDeclSorted(), node.getVarName());
         assert varDeclIndex != -1 : "This should have failed semantic checks";
         int offset = REGISTER_SIZE * (2 + currentMethod.get().getArgumentsSorted().size() + varDeclIndex);
         textRegion.append(String.format("\n\t" + "movq $0, -%d(%%rbp)", offset));

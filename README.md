@@ -8,6 +8,7 @@ Files in `test/test_files` were taken from the MiniJava project page (https://ww
 
 The following recursive implementation of factorial
 
+java
 ```
 class Factorial {
 
@@ -32,6 +33,7 @@ class Fac {
 
 compiles down to
 
+x86
 ```
 .data
 stdout_buffer:

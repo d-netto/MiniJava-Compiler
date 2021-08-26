@@ -17,6 +17,7 @@ import semantics.TypesVisitor;
 
 public class CodegenTest {
 
+    // passes
     @Test public void TestClassOtherThanMain() throws IOException {
         String simpleProgram = "class Main {\n" + "public static void main(String[] args) {\n"
                 + "System.out.println(new Foo().baz())\n;" + "}\n" + "}\n" + "\n" + "class Foo {\n" + "int bar;\n"
@@ -29,14 +30,14 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
-        // SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
-        // goal.accept(codegenVis);
-        // System.out.println(codegenVis.getDataRegion() + "\n" +
-        // codegenVis.getTextRegion());
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        goal.accept(codegenVis);
     }
 
     // All of the following test files were taken form
     // https://www.cambridge.org/resources/052182060X/
+
+    // fails
     @Test public void TestBinarySearch() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_search.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -51,6 +52,7 @@ public class CodegenTest {
         goal.accept(codegenVis);
     }
 
+    // passes
     @Test public void TestBinaryTree() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_tree.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -61,8 +63,11 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        goal.accept(codegenVis);
     }
 
+    // fails
     @Test public void TestBubbleSort() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/bubble_sort.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -73,8 +78,11 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        goal.accept(codegenVis);
     }
 
+    // passes
     @Test public void TestFactorial() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/factorial.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -87,9 +95,9 @@ public class CodegenTest {
         goal.accept(typesVis);
         SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
         goal.accept(codegenVis);
-        System.out.println(codegenVis.getDataRegion() + "\n" + codegenVis.getTextRegion());
     }
 
+    // fails
     @Test public void TestLinear() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linear_search.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -100,8 +108,11 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        goal.accept(codegenVis);
     }
 
+    // fails
     @Test public void TestLinkedList() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linked_list.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -112,8 +123,11 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        goal.accept(codegenVis);
     }
 
+    // fails
     @Test public void TestQuickSort() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/quick_sort.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -124,8 +138,11 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        goal.accept(codegenVis);
     }
 
+    // passes
     @Test public void TestTreeVisitor() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/tree_visitor.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -136,6 +153,8 @@ public class CodegenTest {
         goal.accept(builderVis);
         TypesVisitor typesVis = new TypesVisitor(builderVis);
         goal.accept(typesVis);
+        SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
+        goal.accept(codegenVis);
     }
 
 }

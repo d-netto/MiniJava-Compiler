@@ -41,8 +41,16 @@ public class ClassType extends Type {
         return extendsFrom;
     }
 
+    public List<Pair<String, Type>> getFieldsSorted() {
+        return fieldsSorted;
+    }
+
     public Map<String, Type> getFields() {
         return fields;
+    }
+
+    public List<Pair<String, MethodType>> getMethodsSorted() {
+        return methodsSorted;
     }
 
     public Map<String, MethodType> getMethods() {
@@ -64,16 +72,12 @@ public class ClassType extends Type {
         return getAllParents().contains(otherClassType);
     }
 
-    public void setExtendsFrom(Optional<ClassType> otherExtendsFrom) {
-        extendsFrom = otherExtendsFrom;
-    }
-
-    public void setFields(Map<String, Type> otherFields) {
-        fields = otherFields;
-    }
-
-    public void setMethods(Map<String, MethodType> otherMethods) {
-        methods = otherMethods;
+    public void copy(ClassType otherClassType) {
+        extendsFrom = otherClassType.extendsFrom;
+        fieldsSorted = otherClassType.fieldsSorted;
+        fields = otherClassType.fields;
+        methodsSorted = otherClassType.methodsSorted;
+        methods = otherClassType.methods;
     }
 
     public void update() {

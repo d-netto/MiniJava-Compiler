@@ -65,10 +65,7 @@ public class BuilderVisitor {
     public void addClassType(String className, ClassType classType) {
         if (pendingClasses.containsKey(className)) {
             ClassType pendingClass = pendingClasses.get(className).getClassType();
-            pendingClass.setExtendsFrom(classType.getExtendsFrom());
-            pendingClass.setFields(classType.getFields());
-            pendingClass.setMethods(classType.getMethods());
-            pendingClass.update();
+            pendingClass.copy(classType);
             pendingClasses.remove(className);
             return;
         } else if (classSymbolTable.containsKey(className)) {

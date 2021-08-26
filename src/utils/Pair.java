@@ -28,7 +28,7 @@ public class Pair<K, V> {
     }
 
     @Override public String toString() {
-        return String.format("%s$%s", first.toString(), second.toString());
+        return String.format("%s$%s", second.toString(), first.toString());
     }
 
 }

@@ -238,7 +238,7 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(TrueExpr expr) {
-        textRegion.append("\n\t" + "movq $1, %rax");
+        textRegion.append("\n\t" + "movq $0xFFFFFFFFFFFFFFFF, %rax");
     }
 
     public void visit(ThisExpr expr) {
@@ -268,8 +268,8 @@ public class SimpleCodegenVisitor {
 
     public void visit(DotExpr expr) {
         expr.getLeftHandSide().accept(this);
-        // this is safe (doesn't change typesVis' currentClass/Method) because DotExpr
-        // doesn't visit a ClassNode or MethodDeclNode
+        // the following is safe (doesn't change typesVis' currentClass/Method) because
+        // DotExpr doesn't visit a ClassNode or MethodDeclNode
         Type objType = expr.getLeftHandSide().accept(typesVis);
         assert objType.isClassType() : "This should have failed semantic checks";
         int fieldIndex = findLastIndex(objsLayout.get(((ClassType) objType).getClassName()).getFields(),
@@ -289,8 +289,11 @@ public class SimpleCodegenVisitor {
         textRegion.append("\n\t" + "popq %rdx");
         --currentStackSize;
         textRegion.append("\n\t" + "cmpq %rax, %rdx");
-        textRegion.append("\n\t" + "setl %al");
-        textRegion.append("\n\t" + "movzbq %al, %rax");
+        textRegion.append("\n\t" + "movq $0, %rax");
+        int continuationBlock = ++currentBlockNumber;
+        textRegion.append("\n\t" + String.format("jge block$%d", continuationBlock));
+        textRegion.append("\n\t" + "movq $0xFFFFFFFFFFFFFFFF, %rax");
+        textRegion.append("\n" + String.format("block$%d:", continuationBlock));
     }
 
     public void visit(MultExpr expr) {
@@ -441,6 +444,7 @@ public class SimpleCodegenVisitor {
     }
 
     public void visit(NotExpr expr) {
+        expr.getArgument().accept(this);
         textRegion.append("\n\t" + "notq %rax");
     }
 
@@ -482,7 +486,7 @@ public class SimpleCodegenVisitor {
     // FIXME: this still has weird behavior
     public void visit(SetArrayIndexStatement statement) {
         // %rax will contain the address of the array base
-        getVarAddress(statement.getVarAssignedName());
+        statement.getVarAssigned().accept(this);
         // push pointer to stack
         textRegion.append("\n\t" + "pushq %rax");
         ++currentStackSize;
@@ -506,7 +510,7 @@ public class SimpleCodegenVisitor {
 
     public void visit(SetVariableStatement statement) {
         // %rax will contain the address of the variable
-        getVarAddress(statement.getVarAssignedName());
+        getVarAddress(statement.getVarAssigned().getIdentifierName());
         // push pointer to stack
         textRegion.append("\n\t" + "pushq %rax");
         ++currentStackSize;

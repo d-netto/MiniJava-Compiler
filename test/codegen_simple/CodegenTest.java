@@ -37,7 +37,7 @@ public class CodegenTest {
     // All of the following test files were taken form
     // https://www.cambridge.org/resources/052182060X/
 
-    // fails
+    // passes
     @Test public void TestBinarySearch() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/binary_search.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -67,7 +67,7 @@ public class CodegenTest {
         goal.accept(codegenVis);
     }
 
-    // fails
+    // passes
     @Test public void TestBubbleSort() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/bubble_sort.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -97,7 +97,7 @@ public class CodegenTest {
         goal.accept(codegenVis);
     }
 
-    // fails
+    // passes
     @Test public void TestLinear() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linear_search.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -112,7 +112,7 @@ public class CodegenTest {
         goal.accept(codegenVis);
     }
 
-    // fails
+    // passes
     @Test public void TestLinkedList() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/linked_list.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());
@@ -127,7 +127,7 @@ public class CodegenTest {
         goal.accept(codegenVis);
     }
 
-    // fails
+    // passes
     @Test public void TestQuickSort() throws IOException {
         String simpleProgram = new String(Files.readAllBytes(Paths.get("test/test_files/quick_sort.mjava")));
         InputStream targetStream = new ByteArrayInputStream(simpleProgram.getBytes());

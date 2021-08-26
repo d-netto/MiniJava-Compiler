@@ -258,8 +258,8 @@ public class TypesVisitor {
     }
 
     public void visit(SetArrayIndexStatement statement) {
-        Type arrayVariable = getVarType(statement.getVarAssignedName(), statement.getLine());
-        assert arrayVariable.isIntArrayType() : String.format("Type mismatch in line %d", statement.getLine());
+        Type arrayVariableType = statement.getVarAssigned().accept(this);
+        assert arrayVariableType.isIntArrayType() : String.format("Type mismatch in line %d", statement.getLine());
         assert statement.getIndex().accept(this).isIntType() : String.format("Type mismatch in line %d",
                 statement.getLine());
         assert statement.getRightHandSide().accept(this).isIntType() : String.format("Type mismatch in line %d",
@@ -267,7 +267,7 @@ public class TypesVisitor {
     }
 
     public void visit(SetVariableStatement statement) {
-        Type variableType = getVarType(statement.getVarAssignedName(), statement.getLine());
+        Type variableType = statement.getVarAssigned().accept(this);
         Type rightHandSideType = statement.getRightHandSide().accept(this);
         if (variableType.isClassType()) {
             assert rightHandSideType.isClassType() : String

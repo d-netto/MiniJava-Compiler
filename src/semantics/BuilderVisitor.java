@@ -19,12 +19,11 @@ import semantics.types.Type;
 import semantics.types.base_types.BooleanType;
 import semantics.types.base_types.IntArrayType;
 import semantics.types.base_types.IntType;
-import utils.ClassHolder;
 import utils.Pair;
 
 public class BuilderVisitor {
 
-    private Map<String, ClassHolder> pendingClasses;
+    private Map<String, Pair<Integer, ClassType>> pendingClasses;
 
     private Map<String, ClassType> classSymbolTable;
 
@@ -41,10 +40,10 @@ public class BuilderVisitor {
         if (classSymbolTable.containsKey(className)) {
             return classSymbolTable.get(className);
         } else if (pendingClasses.containsKey(className)) {
-            return pendingClasses.get(className).getClassType();
+            return pendingClasses.get(className).second();
         } else {
             ClassType pendingClass = new ClassType(className, Optional.empty(), new ArrayList<>(), new ArrayList<>());
-            pendingClasses.put(className, new ClassHolder(line, pendingClass));
+            pendingClasses.put(className, new Pair<Integer, ClassType>(line, pendingClass));
             classSymbolTable.put(className, pendingClass);
             return pendingClass;
         }
@@ -64,7 +63,7 @@ public class BuilderVisitor {
 
     public void addClassType(String className, ClassType classType) {
         if (pendingClasses.containsKey(className)) {
-            ClassType pendingClass = pendingClasses.get(className).getClassType();
+            ClassType pendingClass = pendingClasses.get(className).second();
             pendingClass.copy(classType);
             pendingClasses.remove(className);
             return;
@@ -81,7 +80,7 @@ public class BuilderVisitor {
         if (!pendingClasses.isEmpty()) {
             String className = pendingClasses.keySet().iterator().next();
             throw new AssertionError(String.format("Class \"%s\" used in line %d was not defined", className,
-                    pendingClasses.get(className).getLine()));
+                    pendingClasses.get(className).first()));
         }
     }
 

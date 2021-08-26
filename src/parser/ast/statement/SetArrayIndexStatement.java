@@ -3,23 +3,24 @@ package parser.ast.statement;
 import codegen_simple.SimpleCodegenVisitor;
 import parser.ast.base_abs_classes.ExprNode;
 import parser.ast.base_abs_classes.StatementNode;
+import parser.ast.expression.literals.IdentifierExpr;
 import semantics.TypesVisitor;
 
 public class SetArrayIndexStatement extends StatementNode {
 
-    private final String varAssignedName;
+    private final IdentifierExpr varAssigned;
     private final ExprNode index;
     private final ExprNode rightHandSide;
 
-    public SetArrayIndexStatement(int line, String varAssignedName, ExprNode index, ExprNode rightHandSide) {
+    public SetArrayIndexStatement(int line, IdentifierExpr varAssignedName, ExprNode index, ExprNode rightHandSide) {
         super(line);
-        this.varAssignedName = varAssignedName;
+        this.varAssigned = varAssignedName;
         this.index = index;
         this.rightHandSide = rightHandSide;
     }
 
-    public String getVarAssignedName() {
-        return varAssignedName;
+    public IdentifierExpr getVarAssigned() {
+        return varAssigned;
     }
 
     public ExprNode getIndex() {
@@ -31,8 +32,9 @@ public class SetArrayIndexStatement extends StatementNode {
     }
 
     @Override public String prettyString(String identation) {
-        return identation + "SetArrayIndexStatement:" + "\n" + identation + "\t" + varAssignedName + "\n"
-                + index.prettyString(identation + "\t") + "\n" + rightHandSide.prettyString(identation + "\t");
+        return identation + "SetArrayIndexStatement:" + "\n" + identation + "\t"
+                + varAssigned.prettyString(identation + "\t") + "\n" + index.prettyString(identation + "\t") + "\n"
+                + rightHandSide.prettyString(identation + "\t");
     }
 
     @Override public void accept(TypesVisitor vis) {

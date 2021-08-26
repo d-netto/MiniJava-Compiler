@@ -255,14 +255,16 @@ public class MJParser {
             if (twoAhead.getType() == MJLexer.EQUALS) {
                 ExprNode rightHandSide = parseExpr();
                 handleTokenTypeCheck(MJLexer.SEMI_COLON);
-                return new SetVariableStatement(oneAhead.getLine(), oneAhead.getText(), rightHandSide);
+                return new SetVariableStatement(oneAhead.getLine(),
+                        new IdentifierExpr(oneAhead.getLine(), oneAhead.getText()), rightHandSide);
             } else if (twoAhead.getType() == MJLexer.LBRACKET) {
                 ExprNode arrayExpr = parseExpr();
                 handleTokenTypeCheck(MJLexer.RBRACKET);
                 handleTokenTypeCheck(MJLexer.EQUALS);
                 ExprNode index = parseExpr();
                 handleTokenTypeCheck(MJLexer.SEMI_COLON);
-                return new SetArrayIndexStatement(oneAhead.getLine(), oneAhead.getText(), arrayExpr, index);
+                return new SetArrayIndexStatement(oneAhead.getLine(),
+                        new IdentifierExpr(oneAhead.getLine(), oneAhead.getText()), arrayExpr, index);
             }
         default:
             throw new AssertionError(String.format("Error while trying to parse \"%s\" symbol in line %d",

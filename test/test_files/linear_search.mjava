@@ -59,18 +59,17 @@ class LS {
         while (j < (size)) {
             aux01 = number[j];
             aux02 = num + 1;
-            if (aux01 < num)
+            if (aux01 < num) {
                 nt = 0;
-            else if (!(aux01 < aux02))
+            } else if (!(aux01 < aux02)) {
                 nt = 0;
-            else {
+            } else {
                 ls01 = true;
                 ifound = 1;
                 j = size;
             }
             j = j + 1;
         }
-
         return ifound;
     }
 

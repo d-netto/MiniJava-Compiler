@@ -3,21 +3,22 @@ package parser.ast.statement;
 import codegen_simple.SimpleCodegenVisitor;
 import parser.ast.base_abs_classes.ExprNode;
 import parser.ast.base_abs_classes.StatementNode;
+import parser.ast.expression.literals.IdentifierExpr;
 import semantics.TypesVisitor;
 
 public class SetVariableStatement extends StatementNode {
 
-    private final String varAssignedName;
+    private final IdentifierExpr varAssigned;
     private final ExprNode rightHandSide;
 
-    public SetVariableStatement(int line, String varAssignedName, ExprNode rightHandSide) {
+    public SetVariableStatement(int line, IdentifierExpr varAssigned, ExprNode rightHandSide) {
         super(line);
-        this.varAssignedName = varAssignedName;
+        this.varAssigned = varAssigned;
         this.rightHandSide = rightHandSide;
     }
 
-    public String getVarAssignedName() {
-        return varAssignedName;
+    public IdentifierExpr getVarAssigned() {
+        return varAssigned;
     }
 
     public ExprNode getRightHandSide() {
@@ -25,8 +26,8 @@ public class SetVariableStatement extends StatementNode {
     }
 
     @Override public String prettyString(String identation) {
-        return identation + "SetVariableStatement:" + "\n" + identation + "\t" + varAssignedName + "\n"
-                + rightHandSide.prettyString(identation + "\t");
+        return identation + "SetVariableStatement:" + "\n" + identation + "\t"
+                + varAssigned.prettyString(identation + "\t") + "\n" + rightHandSide.prettyString(identation + "\t");
     }
 
     @Override public void accept(TypesVisitor vis) {

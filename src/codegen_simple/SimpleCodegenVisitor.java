@@ -483,7 +483,6 @@ public class SimpleCodegenVisitor {
         }
     }
 
-    // FIXME: this still has weird behavior
     public void visit(SetArrayIndexStatement statement) {
         // %rax will contain the address of the array base
         statement.getVarAssigned().accept(this);

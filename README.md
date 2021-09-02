@@ -32,7 +32,7 @@ class Fac {
 }
 ```
 
-In order to build the project, ccompile and run `factorial.mjava`, one must execute
+In order to build the project, ccompile and run it, one must execute
 
 ```
 ant build

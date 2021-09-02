@@ -1,0 +1,34 @@
+<project name="minijava-compiler" basedir="." default="compile">
+
+    <fail message="Ant 1.10.4+ is required!">
+        <condition>
+            <not>
+                <antversion atleast="1.10.4"/>
+            </not>
+        </condition>
+    </fail>
+
+    <path id="classpath">
+        <pathelement path="bin/src"/>
+        <pathelement path="bin/test"/>
+        <fileset dir="lib" includes="*.jar" />
+    </path>
+
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="bin/src"/>
+        <mkdir dir="bin/test"/>
+        <mkdir dir="bin/test-report"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac destdir="bin/src" classpathref="classpath" srcdir="src" includeantruntime="false"/>
+        <javac destdir="bin/test" classpathref="classpath" srcdir="test" includeantruntime="false"/>
+    </target>
+
+    <target name="build" description="clean build" depends="clean, compile" />
+
+</project>

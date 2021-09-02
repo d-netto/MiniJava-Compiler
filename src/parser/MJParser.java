@@ -107,11 +107,11 @@ public class MJParser {
     this.scanner = scanner;
   }
 
-  private final Token lookahead(int stepsAhead) {
+  private Token lookahead(int stepsAhead) {
     return tokenBuffer.buffer.get(stepsAhead - 1);
   }
 
-  private final Token nextToken() {
+  private Token nextToken() {
     if (!tokenBuffer.hasReachedEnd) {
       Token firstToken = tokenBuffer.buffer.remove(0);
       while (!tokenBuffer.hasReachedEnd && tokenBuffer.buffer.size() < BUFFER_SIZE) {
@@ -124,17 +124,17 @@ public class MJParser {
     return tokenBuffer.buffer.remove(0);
   }
 
-  private final boolean canFormVarDecl() {
+  private boolean canFormVarDecl() {
     Token oneAhead = lookahead(1);
     Token twoAhead = lookahead(2);
     return types.contains(oneAhead.getType()) && twoAhead.getType() == MJLexer.ID;
   }
 
-  private final boolean canFormMethodDecl() {
+  private boolean canFormMethodDecl() {
     return lookahead(1).getType() == MJLexer.PUBLIC_KW;
   }
 
-  private final boolean canFormStatement() {
+  private boolean canFormStatement() {
     Token oneAhead = lookahead(1);
     switch (oneAhead.getType()) {
       case MJLexer.CURLY_LBRACKET:
@@ -150,7 +150,7 @@ public class MJParser {
     }
   }
 
-  private final Token handleTokenTypeCheck(int expectedTypeInt) {
+  private Token handleTokenTypeCheck(int expectedTypeInt) {
     Token token = nextToken();
     assert token.getType() == expectedTypeInt
         : String.format(

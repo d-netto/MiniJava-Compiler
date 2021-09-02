@@ -602,8 +602,13 @@ public class SimpleCodegenVisitor {
     if (stackAllocBytes % 2 == 1) {
       stackAllocBytes += 1;
     }
+    // size of stack is initially equal to what we allocate in the
+    // preamble
     currentStackSize = stackAllocBytes;
+    // stack allocation
     textRegion.append("\n\t" + String.format("subq $%d, %%rsp", REGISTER_SIZE * stackAllocBytes));
+    // NOTE: current implementation doesn't support more than
+    // 6 arguments (maximum we can fit in register arguments)
     int numberOfArgs = node.getMethodArgs().size() + 1;
     assert numberOfArgs <= ARGUMENT_REGISTERS.size()
         : "Current implementation doesn't support more than 6 arguments";

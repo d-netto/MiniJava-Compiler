@@ -4,9 +4,11 @@ Compiler for a subset of Java introduced by Appel's Modern Compiler Implementati
 
 Files in `/test/test_files` were taken from https://www.cambridge.org/resources/052182060X/.
 
-## Example of AT&T x86 Assembly Code Generation
+## Usage
 
-The following recursive implementation of factorial
+`Ant 1.10.4+` and `GCC 9.3.0+` are required for usage. To build the project, `ant build` must be executed in the repo's root. To compile and run a `MiniJava` file, `./minijava.sh <path_to_file>` must be executed also in the repo's root. 
+
+As an example, consider the following implementation of factorial from `factorial.mjava`
 
 ```java
 class Factorial {
@@ -30,7 +32,18 @@ class Fac {
 }
 ```
 
-compiles down to
+In order to build the project, ccompile and run `factorial.mjava`, one must execute
+
+```
+ant build
+./minijava.sh test/test_files/factorial.mjava
+```
+
+which outputs 3628800, as expected.
+
+## Example of AT&T x86 Assembly Code Generation
+
+The recursive implementation of factorial mentioned above compiles down to
 
 ```assembly
 .data
@@ -126,6 +139,5 @@ block$3:
 
 ## Future Work
 
-- [ ] Command line interface.
 - [ ] New intermediate representation and dataflow optimizations.
 - [ ] Register allocation.

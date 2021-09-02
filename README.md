@@ -39,7 +39,7 @@ ant build
 ./minijava.sh test/test_files/factorial.mjava
 ```
 
-which outputs 3628800, as expected.
+which outputs 3628800.
 
 ## Compatibility Note
 

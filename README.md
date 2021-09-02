@@ -6,7 +6,7 @@ Files in `/test/test_files` were taken from https://www.cambridge.org/resources/
 
 ## Usage
 
-`Ant 1.10.4+` and `GCC 9.3.0+` are required for usage. To build the project, `ant build` must be executed in the repo's root. To compile and run a `MiniJava` file, `./minijava.sh <path_to_file>` must be executed (also in the repo's root). 
+`Ant 1.10.4+` and `GCC 9.3.0+` are required. To build the project, `ant build` must be executed in the repo's root. To compile and run a `MiniJava` file, `./minijava.sh <path_to_file>` must be executed (also in the repo's root). 
 
 As an example, consider the following implementation of factorial from `factorial.mjava`
 

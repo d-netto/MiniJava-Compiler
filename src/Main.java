@@ -27,7 +27,7 @@ public class Main {
     goal.accept(typesVis);
     SimpleCodegenVisitor codegenVis = new SimpleCodegenVisitor(typesVis);
     goal.accept(codegenVis);
-    String assemblyStr = codegenVis.getDataRegion() + codegenVis.getTextRegion();
+    String assemblyStr = codegenVis.getDataRegion() + codegenVis.getTextRegion() + "\n";
     byte[] strToBytes = assemblyStr.getBytes();
     Files.write(Paths.get(args[1]), strToBytes);
   }

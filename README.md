@@ -41,6 +41,10 @@ ant build
 
 which outputs 3628800, as expected.
 
+## Compatibility Note
+
+Due to (among other reasons) absolute addressing being used in the `leaq` instruction, the current implementation is not compatible with MacOS.
+
 ## Example of AT&T x86 Assembly Code Generation
 
 The recursive implementation of factorial mentioned above compiles down to
